@@ -3,12 +3,14 @@ use bevy::prelude::*;
 use bevy::window::PresentMode;
 use bevy_rapier2d::prelude::*;
 
-use camera::setup_camera;
+use camera::{center_camera_on_player, setup_camera};
 use input::{init_cursor_world_coords, update_cursor_world_coords};
-use player::PlayerManagementPlugin;
+use level::LevelManagementPlugin;
+use player::{movement::move_player, PlayerManagementPlugin};
 
 mod camera;
 mod input;
+mod level;
 mod player;
 
 fn main() {
@@ -32,19 +34,11 @@ fn main() {
         .add_plugins(FrameTimeDiagnosticsPlugin)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(16.0))
         .add_plugins(RapierDebugRenderPlugin::default())
+        .add_plugins(PlayerManagementPlugin)
+        .add_plugins(LevelManagementPlugin)
         .add_systems(Startup, setup_camera)
-        .add_systems(Startup, setup_test)
+        .add_systems(FixedUpdate, center_camera_on_player.after(move_player))
         .add_systems(Startup, init_cursor_world_coords)
         .add_systems(Update, update_cursor_world_coords)
-        .add_plugins(PlayerManagementPlugin)
         .run();
-}
-
-fn setup_test(mut commands: Commands) {
-    commands
-        .spawn(Collider::cuboid(500.0, 50.0))
-        .insert(Transform::from_xyz(0.0, 100.0, 0.0));
-    commands
-        .spawn(Collider::cuboid(500.0, 50.0))
-        .insert(Transform::from_xyz(0.0, -100.0, 0.0));
 }
