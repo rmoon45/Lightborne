@@ -22,7 +22,7 @@ impl Plugin for LevelManagementPlugin {
             .insert_resource(LevelSelection::index(0))
             .register_ldtk_entity::<PlayerBundle>("Lyra")
             .register_ldtk_int_cell::<WallBundle>(1)
-            .register_ldtk_int_cell::<ButtonBundle>(4)
+            .register_ldtk_int_cell::<ButtonBundle>(5)
             .add_systems(Update, spawn_wall_collision);
     }
 }

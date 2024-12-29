@@ -42,7 +42,7 @@ pub struct LightMaterialBundle {
 impl From<IntGridCell> for LightMaterialBundle {
     fn from(int_grid_cell: IntGridCell) -> Self {
         // Temporary button
-        if int_grid_cell.value == 4 {
+        if int_grid_cell.value == 5 {
             Self {
                 collider: Collider::cuboid(4., 4.),
                 sensor: Sensor,
