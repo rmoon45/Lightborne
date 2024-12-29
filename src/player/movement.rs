@@ -28,7 +28,7 @@ pub fn move_player(
 
     const PLAYER_MAX_H_VEL: f32 = 1.5;
     const PLAYER_MAX_Y_VEL: f32 = 5.;
-    const PLAYER_AIR_MOVEMENT_COEFF: f32 = 0.2;
+    const PLAYER_AIR_MOVEMENT_COEFF: f32 = 0.7;
     const PLAYER_JUMP_VEL: f32 = 2.5;
 
     if output.grounded {
