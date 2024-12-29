@@ -6,12 +6,15 @@ use bevy_rapier2d::prelude::*;
 use camera::setup_camera;
 use input::{init_cursor_world_coords, update_cursor_world_coords};
 use level::LevelManagementPlugin;
+use light::LightManagementPlugin;
 use player::PlayerManagementPlugin;
 
 mod camera;
 mod input;
 mod level;
+mod light;
 mod player;
+mod shared;
 
 fn main() {
     App::new()
@@ -36,6 +39,7 @@ fn main() {
         .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(PlayerManagementPlugin)
         .add_plugins(LevelManagementPlugin)
+        .add_plugins(LightManagementPlugin)
         .add_systems(Startup, setup_camera)
         .add_systems(Startup, init_cursor_world_coords)
         .add_systems(Update, update_cursor_world_coords)

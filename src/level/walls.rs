@@ -4,6 +4,8 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
+use crate::shared::GroupLabel;
+
 #[derive(Default, Component)]
 pub struct Wall;
 
@@ -165,6 +167,10 @@ pub fn spawn_wall_collision(
                                 (wall_rect.top as f32 - wall_rect.bottom as f32 + 1.)
                                     * grid_size as f32
                                     / 2.,
+                            ))
+                            .insert(CollisionGroups::new(
+                                GroupLabel::TERRAIN,
+                                GroupLabel::PLAYER_COLLIDER | GroupLabel::LIGHT_RAY,
                             ))
                             .insert(RigidBody::Fixed)
                             .insert(Friction::new(1.0))

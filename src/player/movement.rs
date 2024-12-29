@@ -3,18 +3,11 @@ use bevy_rapier2d::prelude::*;
 
 use super::{PlayerMarker, PlayerMovement};
 
-pub fn queue_jump(
-    mut q_player: Query<
-        (&mut PlayerMovement, &KinematicCharacterControllerOutput),
-        With<PlayerMarker>,
-    >,
-) {
-    let Ok((mut player, output)) = q_player.get_single_mut() else {
+pub fn queue_jump(mut q_player: Query<&mut PlayerMovement, With<PlayerMarker>>) {
+    let Ok(mut player) = q_player.get_single_mut() else {
         return;
     };
-    if output.grounded {
-        player.jump_queued.reset();
-    }
+    player.jump_queued.reset();
 }
 
 pub fn move_player(
@@ -38,14 +31,20 @@ pub fn move_player(
     const PLAYER_AIR_MOVEMENT_COEFF: f32 = 0.2;
     const PLAYER_JUMP_VEL: f32 = 2.5;
 
+    if output.grounded {
+        player.coyote_time.reset();
+    }
+
     let mut jumped = false;
-    if !player.jump_queued.finished() {
+    // Can only jump if they've pressed space within the past 100 millis, and they have been
+    // grounded in the past 100 millis
+    if !player.jump_queued.finished() && !player.coyote_time.finished() {
         player.velocity.y = PLAYER_JUMP_VEL;
-        player.last_jumped.reset();
+        player.prevent_jump_cut.reset();
         jumped = true;
     } else if !keys.pressed(KeyCode::Space)
         && player.velocity.y > 0.
-        && player.last_jumped.elapsed_secs() > 0.01
+        && player.prevent_jump_cut.finished()
     {
         // Jump was cut
         player.velocity.y = 0.;
@@ -92,8 +91,9 @@ pub fn move_player(
         }
     }
 
-    player.last_jumped.tick(time.delta());
+    player.prevent_jump_cut.tick(time.delta());
     player.jump_queued.tick(time.delta());
+    player.coyote_time.tick(time.delta());
 
     controller.translation = Some(player.velocity);
 }

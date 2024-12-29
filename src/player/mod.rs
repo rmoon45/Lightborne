@@ -3,18 +3,14 @@ use std::time::Duration;
 use bevy::{
     input::common_conditions::{input_just_pressed, input_pressed},
     prelude::*,
-    time::Stopwatch,
 };
 use bevy_ecs_ldtk::prelude::*;
-use bevy_rapier2d::prelude::*;
 
-use crate::input::update_cursor_world_coords;
+use crate::{input::update_cursor_world_coords, light::shoot::shoot_light};
 
-use light::shoot_light;
 use movement::{move_player, queue_jump};
 use spawn::process_player;
 
-mod light;
 pub mod movement;
 mod spawn;
 
@@ -38,34 +34,30 @@ impl Plugin for PlayerManagementPlugin {
     }
 }
 
-#[derive(Component, Default)]
-#[require(
-    Collider,
-    KinematicCharacterController,
-    KinematicCharacterControllerOutput,
-    RigidBody,
-    Friction,
-    Restitution,
-    PlayerMovement
-)]
-pub struct Player;
-
 #[derive(Component)]
 pub struct PlayerMovement {
-    /// Holds information that is passed into the rapier character controller
+    /// Holds information that is passed into the rapier character controller's translation
     velocity: Vec2,
-    /// Use `elapsed_secs()` to get the time since the last jump
-    last_jumped: Stopwatch,
-    /// Started on the frame the space bar is pressed,  the player is then only allowed to jump
-    /// within the next window
+
+    /// Started on the frame the player jumps. If this timer is still running, the player should
+    /// not be able to cut their jump (to prevent super tiny jumps)
+    prevent_jump_cut: Timer,
+
+    /// Started on the frame the space bar is pressed. The player is will try to jump until the
+    /// time expires, given that all other conditions are met.
     jump_queued: Timer,
+
+    /// Started whenever the player is grounded. If the player attempts a jump even while not
+    /// grounded, as long as this timer has not expired they are stil permitted to jump.
+    coyote_time: Timer,
 }
 
 impl Default for PlayerMovement {
     fn default() -> Self {
         Self {
             jump_queued: Timer::new(Duration::from_millis(100), TimerMode::Once),
-            last_jumped: Stopwatch::new(),
+            coyote_time: Timer::new(Duration::from_millis(80), TimerMode::Once),
+            prevent_jump_cut: Timer::new(Duration::from_millis(30), TimerMode::Once),
             velocity: Vec2::ZERO,
         }
     }
