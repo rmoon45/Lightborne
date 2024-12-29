@@ -1,5 +1,5 @@
 use bevy::{input::common_conditions::input_pressed, prelude::*};
-use bevy_ecs_ldtk::LdtkEntity;
+use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::input::update_cursor_world_coords;

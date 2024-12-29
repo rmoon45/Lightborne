@@ -25,8 +25,10 @@ pub fn move_player(
     if keys.pressed(KeyCode::Space) && output.grounded {
         player.velocity.y = 4.;
         jumped = true;
-    } else if !keys.pressed(KeyCode::Space) && player.velocity.y > 0. {
-        // Jump cutting
+    } else if (!keys.pressed(KeyCode::Space) && player.velocity.y > 0.)
+        || output.desired_translation.y - output.effective_translation.y > 0.05
+    {
+        // Jump cut when space is let go, or we've bonked our head on a wall
         // TODO: ensure minimum length jump
         player.velocity.y = 0.;
     } else if output.grounded {
