@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use super::{Player, PlayerMarker};
+use super::{Player, PlayerMarker, PlayerMovement};
 
 pub fn process_player(
     mut commands: Commands,
@@ -19,6 +19,11 @@ pub fn process_player(
         .insert(Player::default())
         .insert(Collider::cuboid(8.0, 9.5))
         .insert(RigidBody::KinematicPositionBased)
+        .insert(KinematicCharacterController {
+            offset: CharacterLength::Relative(0.05),
+            ..default()
+        })
+        .insert(PlayerMovement::default())
         .insert(Friction {
             coefficient: 0.,
             combine_rule: CoefficientCombineRule::Min,
