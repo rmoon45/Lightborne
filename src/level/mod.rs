@@ -38,7 +38,7 @@ fn setup_level(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
-#[derive(Default, Component)]
+#[derive(Default, Bundle)]
 pub struct CollidableEntity {
     collider: Collider,
     rigid_body: RigidBody,
@@ -48,7 +48,7 @@ impl From<&EntityInstance> for CollidableEntity {
     fn from(entity_instance: &EntityInstance) -> Self {
         match entity_instance.identifier.as_ref() {
             "Door" => CollidableEntity {
-                collider: Collider::cuboid(4., 8.),
+                collider: Collider::cuboid(4., 4.),
                 rigid_body: RigidBody::Fixed,
             },
             _ => unreachable!(),
