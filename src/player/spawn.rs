@@ -3,7 +3,7 @@ use bevy_rapier2d::prelude::*;
 
 use crate::shared::GroupLabel;
 
-use super::{PlayerMarker, PlayerMovement};
+use super::{movement::PlayerMovement, PlayerMarker};
 
 pub fn process_player(
     mut commands: Commands,
