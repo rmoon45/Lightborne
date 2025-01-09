@@ -3,13 +3,14 @@ use bevy_rapier2d::{math::Real, prelude::*};
 
 use crate::{input::CursorWorldCoords, player::PlayerMarker, shared::GroupLabel};
 
-use super::LightMaterial;
+use super::{HitByLight, LightSensor};
 
 pub fn shoot_light(
+    mut commands: Commands,
     q_player: Query<&Transform, With<PlayerMarker>>,
     mut q_rapier: Query<&mut RapierContext>,
     q_cursor: Query<&CursorWorldCoords>,
-    mut q_light_material: Query<&mut LightMaterial>,
+    q_light_material: Query<&LightSensor>,
     mut gizmos: Gizmos,
 ) {
     let Ok(player_transform) = q_player.get_single() else {
@@ -31,27 +32,27 @@ pub fn shoot_light(
 
     let mut pts: Vec<Vec2> = vec![ray_pos];
 
-    const MAX_LIGHT_SEGMENTS: usize = 2;
+    const MAX_LIGHT_SEGMENTS: usize = 3;
     for _ in 0..MAX_LIGHT_SEGMENTS {
-        let Some((entity, x)) =
+        let Some((entity, intersection)) =
             rapier_context.cast_ray_and_get_normal(ray_pos, ray_dir, Real::MAX, true, ray_qry)
         else {
             break;
         };
 
-        if x.time_of_impact < 0.01 {
+        if intersection.time_of_impact < 0.01 {
             break;
         }
 
-        pts.push(x.point);
+        pts.push(intersection.point);
 
-        if let Ok(mut interaction) = q_light_material.get_mut(entity) {
-            interaction.currently_hit = true;
+        if q_light_material.contains(entity) {
+            commands.entity(entity).insert(HitByLight);
             break;
         };
 
-        ray_pos = x.point;
-        ray_dir = ray_dir.reflect(x.normal);
+        ray_pos = intersection.point;
+        ray_dir = ray_dir.reflect(intersection.normal);
         ray_qry = ray_qry.exclude_collider(entity);
     }
 

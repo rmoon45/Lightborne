@@ -3,11 +3,12 @@ use bevy::{
     prelude::*,
 };
 use bevy_ecs_ldtk::prelude::*;
+use bevy_rapier2d::prelude::*;
 
 use crate::{input::update_cursor_world_coords, light::shoot::shoot_light};
 
-use movement::{move_player, queue_jump};
-use spawn::process_player;
+use movement::{move_player, queue_jump, PlayerMovement};
+use spawn::{add_player_sensors, init_player_bundle};
 
 pub mod movement;
 mod spawn;
@@ -15,7 +16,7 @@ mod spawn;
 pub struct PlayerManagementPlugin;
 impl Plugin for PlayerManagementPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, process_player) // ran when LDTK spawns the player
+        app.add_systems(Update, add_player_sensors) // ran when LDTK spawns the player
             .add_systems(FixedUpdate, move_player)
             .add_systems(
                 Update,
@@ -32,15 +33,29 @@ impl Plugin for PlayerManagementPlugin {
     }
 }
 
-/// To signal our own code to finish the initialization of the player
+/// To signal our own code to finish the initialization of the player (adding sensors, etc)
 #[derive(Component, Default)]
 pub struct PlayerMarker;
 
-/// Will be spawned by LDTK. Player is technically a part of this bundle, but we want to spawn it
-/// ourselves so it is not included here.
-#[derive(Default, Bundle, LdtkEntity)]
+#[derive(Default, Bundle)]
 pub struct PlayerBundle {
+    body: RigidBody,
+    controller: KinematicCharacterController,
+    controller_output: KinematicCharacterControllerOutput,
+    collider: Collider,
+    collision_groups: CollisionGroups,
+    player_movement: PlayerMovement,
+    friction: Friction,
+    restitution: Restitution,
+}
+
+#[derive(Default, Bundle, LdtkEntity)]
+pub struct LdtkPlayerBundle {
     player_marker: PlayerMarker,
-    #[sprite_sheet]
+    #[with(init_player_bundle)]
+    player: PlayerBundle,
+    #[sprite("lyra.png")]
     sprite: Sprite,
+    #[worldly]
+    worldly: Worldly,
 }
