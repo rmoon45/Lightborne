@@ -21,6 +21,10 @@ pub struct LevelManagementPlugin;
 impl Plugin for LevelManagementPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(LdtkPlugin)
+            // .insert_resource(LdtkSettings {
+            //     level_background: LevelBackground::Nonexistent,
+            //     ..default()
+            // })
             .add_plugins(ActivatablePlugin)
             .add_systems(Startup, setup_level)
             .insert_resource(LevelSelection::index(0))

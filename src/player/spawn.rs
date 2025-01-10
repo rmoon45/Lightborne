@@ -40,6 +40,10 @@ pub fn add_player_sensors(mut commands: Commands, q_player: Query<Entity, Added<
             .insert(CollisionGroups::new(
                 GroupLabel::PLAYER_SENSOR,
                 GroupLabel::HURT_SENSOR,
-            ));
+            ))
+            .insert(PointLight {
+                intensity: 100_000.0,
+                ..default()
+            });
     });
 }

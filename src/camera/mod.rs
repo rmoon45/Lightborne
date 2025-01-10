@@ -1,4 +1,8 @@
-use bevy::{prelude::*, render::camera::ScalingMode};
+use bevy::{
+    core_pipeline::{bloom::Bloom, tonemapping::Tonemapping},
+    prelude::*,
+    render::camera::ScalingMode,
+};
 
 #[derive(Component, Default)]
 pub struct MainCamera;
@@ -7,6 +11,12 @@ pub fn setup_camera(mut commands: Commands) {
     commands
         .spawn(Camera2d)
         .insert(MainCamera)
+        .insert(Camera {
+            hdr: true,
+            ..default()
+        })
+        .insert(Tonemapping::TonyMcMapface)
+        .insert(Bloom::default())
         .insert(Projection::Orthographic(OrthographicProjection {
             scaling_mode: ScalingMode::Fixed {
                 width: 320.,
