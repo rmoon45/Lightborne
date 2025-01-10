@@ -1,17 +1,16 @@
-use bevy::{color::palettes::css::*, prelude::*};
+use bevy::prelude::*;
 use bevy_rapier2d::{math::Real, prelude::*};
 
 use crate::{input::CursorWorldCoords, player::PlayerMarker, shared::GroupLabel};
 
-use super::{HitByLight, LightSensor};
+use super::{HitByLight, LightSegment, LightSensor, MAX_LIGHT_SEGMENTS};
 
 pub fn shoot_light(
     mut commands: Commands,
     q_player: Query<&Transform, With<PlayerMarker>>,
     mut q_rapier: Query<&mut RapierContext>,
     q_cursor: Query<&CursorWorldCoords>,
-    q_light_material: Query<&LightSensor>,
-    mut gizmos: Gizmos,
+    q_light_sensor: Query<&LightSensor>,
 ) {
     let Ok(player_transform) = q_player.get_single() else {
         return;
@@ -32,7 +31,6 @@ pub fn shoot_light(
 
     let mut pts: Vec<Vec2> = vec![ray_pos];
 
-    const MAX_LIGHT_SEGMENTS: usize = 3;
     for _ in 0..MAX_LIGHT_SEGMENTS {
         let Some((entity, intersection)) =
             rapier_context.cast_ray_and_get_normal(ray_pos, ray_dir, Real::MAX, true, ray_qry)
@@ -46,7 +44,7 @@ pub fn shoot_light(
 
         pts.push(intersection.point);
 
-        if q_light_material.contains(entity) {
+        if q_light_sensor.contains(entity) {
             commands.entity(entity).insert(HitByLight);
             break;
         };
@@ -56,6 +54,13 @@ pub fn shoot_light(
         ray_qry = ray_qry.exclude_collider(entity);
     }
 
-    // FIXME: render with shader/something else and not gizmos
-    gizmos.linestrip_gradient_2d(pts.iter().map(|pt| (*pt, RED)));
+    let entities: Vec<LightSegment> = pts
+        .windows(2)
+        .map(|segment| LightSegment {
+            start: segment[0],
+            end: segment[1],
+        })
+        .collect();
+
+    commands.spawn_batch(entities);
 }
