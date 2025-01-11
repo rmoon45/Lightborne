@@ -5,11 +5,10 @@ use bevy::{
 };
 use enum_map::{enum_map, EnumMap};
 
-use super::{LightColor, LightSegment, LIGHT_SEGMENT_THICKNESS};
+use super::{segments::LightSegment, LightColor, LIGHT_SEGMENT_THICKNESS};
 
 const LIGHT_SHADER_PATH: &str = "shaders/light.wgsl";
 
-#[derive(Resource)]
 pub struct LightRenderData {
     pub mesh: Mesh2d,
     pub material_map: EnumMap<LightColor, MeshMaterial2d<LightMaterial>>,
@@ -61,7 +60,7 @@ pub struct LightSegmentRenderBundle {
 
 pub fn insert_segment_meshes(
     mut commands: Commands,
-    render_data: Res<LightRenderData>,
+    render_data: Local<LightRenderData>,
     q_segments: Query<(Entity, &LightSegment), Added<LightSegment>>,
 ) {
     let segs: Vec<(Entity, LightSegmentRenderBundle)> = q_segments
