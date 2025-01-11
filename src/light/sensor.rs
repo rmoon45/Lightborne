@@ -21,7 +21,7 @@ impl From<&EntityInstance> for LightSensorBundle {
                 sensor: Sensor,
                 collision_groups: CollisionGroups::new(
                     GroupLabel::LIGHT_SENSOR,
-                    GroupLabel::LIGHT_RAY,
+                    GroupLabel::LIGHT_RAY | GroupLabel::WHITE_RAY,
                 ),
                 light_interaction: LightSensor {
                     activation_timer: Timer::new(Duration::from_millis(500), TimerMode::Once),

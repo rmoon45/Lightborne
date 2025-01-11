@@ -20,7 +20,7 @@ impl From<&EntityInstance> for FixedEntityBundle {
                 rigid_body: RigidBody::Fixed,
                 collision_groups: CollisionGroups::new(
                     GroupLabel::TERRAIN,
-                    GroupLabel::LIGHT_RAY | GroupLabel::PLAYER_COLLIDER,
+                    GroupLabel::LIGHT_RAY | GroupLabel::PLAYER_COLLIDER | GroupLabel::WHITE_RAY,
                 ),
             },
             _ => unreachable!(),

@@ -3,31 +3,34 @@ use bevy::{
     render::render_resource::{AsBindGroup, ShaderRef},
     sprite::{AlphaMode2d, Material2d},
 };
+use enum_map::{enum_map, EnumMap};
 
-use super::{LightSegment, SEGMENT_THICKNESS};
+use super::{LightColor, LightSegment, LIGHT_SEGMENT_THICKNESS};
 
 const LIGHT_SHADER_PATH: &str = "shaders/light.wgsl";
 
 #[derive(Resource)]
 pub struct LightRenderData {
     pub mesh: Mesh2d,
-    pub material: MeshMaterial2d<LightMaterial>,
+    pub material_map: EnumMap<LightColor, MeshMaterial2d<LightMaterial>>,
 }
 
 impl FromWorld for LightRenderData {
     fn from_world(world: &mut World) -> Self {
         let mut meshes = world.resource_mut::<Assets<Mesh>>();
-        let mesh_handle = Mesh2d(meshes.add(Rectangle::new(1.0, SEGMENT_THICKNESS)));
+        let mesh_handle = meshes
+            .add(Rectangle::new(1.0, LIGHT_SEGMENT_THICKNESS))
+            .into();
 
         let mut materials = world.resource_mut::<Assets<LightMaterial>>();
-        let material_handle = MeshMaterial2d(materials.add(LightMaterial {
-            color: Color::srgb(5.0, 0.0, 3.0).into(),
-            alpha_mode: AlphaMode2d::Blend,
-        }));
 
         LightRenderData {
             mesh: mesh_handle,
-            material: material_handle,
+            material_map: enum_map! {
+                LightColor::Green => materials.add(LightMaterial::from(LightColor::Green)).into(),
+                LightColor::Red => materials.add(LightMaterial::from(LightColor::Red)).into(),
+                LightColor::White => materials.add(LightMaterial::from(LightColor::White)).into(),
+            },
         }
     }
 }
@@ -36,7 +39,7 @@ impl FromWorld for LightRenderData {
 pub struct LightMaterial {
     #[uniform(0)]
     pub color: LinearRgba,
-    alpha_mode: AlphaMode2d,
+    pub alpha_mode: AlphaMode2d,
 }
 
 impl Material2d for LightMaterial {
@@ -53,39 +56,25 @@ impl Material2d for LightMaterial {
 pub struct LightSegmentRenderBundle {
     mesh: Mesh2d,
     material: MeshMaterial2d<LightMaterial>,
-    transform: Transform,
     visibility: Visibility,
 }
 
 pub fn insert_segment_meshes(
     mut commands: Commands,
     render_data: Res<LightRenderData>,
-    q_segments: Query<(Entity, &LightSegment)>,
+    q_segments: Query<(Entity, &LightSegment), Added<LightSegment>>,
 ) {
-    let segs = q_segments
+    let segs: Vec<(Entity, LightSegmentRenderBundle)> = q_segments
         .iter()
         .map(|(entity, segment)| {
-            let midpoint = segment.start.midpoint(segment.end).extend(1.0);
-            let scale = Vec3::new(segment.start.distance(segment.end), 1., 1.);
-            let rotation = (segment.end - segment.start).to_angle();
-
             let segment_bundle = LightSegmentRenderBundle {
                 mesh: render_data.mesh.clone(),
-                material: render_data.material.clone(),
-                transform: Transform::from_translation(midpoint)
-                    .with_scale(scale)
-                    .with_rotation(Quat::from_rotation_z(rotation)),
+                material: render_data.material_map[segment.color].clone(),
                 visibility: Visibility::Visible,
             };
             (entity, segment_bundle)
         })
-        .collect::<Vec<(Entity, LightSegmentRenderBundle)>>();
+        .collect();
 
     commands.insert_batch(segs);
-}
-
-pub fn clean_segments(mut commands: Commands, q_segment_meshes: Query<Entity, With<LightSegment>>) {
-    for entity in q_segment_meshes.iter() {
-        commands.entity(entity).despawn_recursive();
-    }
 }
