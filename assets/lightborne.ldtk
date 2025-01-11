@@ -1193,9 +1193,9 @@
 		{
 			"__cWid": 6,
 			"__cHei": 5,
-			"identifier": "Brick_tiles",
+			"identifier": "Lightborne_tileset",
 			"uid": 111,
-			"relPath": "lightborne-brick-tileset.png",
+			"relPath": "lightborne tileset.png",
 			"embedAtlas": null,
 			"pxWid": 48,
 			"pxHei": 40,
@@ -1208,8 +1208,8 @@
 			"customData": [],
 			"savedSelections": [],
 			"cachedPixelData": {
-				"opaqueTiles": "010101001111111111111111110000",
-				"averageColors": "0000f235e235f235e335f235e235e335f235f224f335f235f335f224f224f224f224f335f335f235f335f113f235f335f224f2350000000000000000"
+				"opaqueTiles": "010101001111111111111111111010",
+				"averageColors": "0000f235e235f235e335f235e235e335f235f224f335f235f335f224f224f224f224f335f335f235f335f113f235f335f224f235f6a679c9fb687e9b"
 			}
 		},
 		{
@@ -1432,7 +1432,7 @@
 					"__pxTotalOffsetX": 0,
 					"__pxTotalOffsetY": 0,
 					"__tilesetDefUid": 111,
-					"__tilesetRelPath": "lightborne-brick-tileset.png",
+					"__tilesetRelPath": "lightborne tileset.png",
 					"iid": "a2b563a3-66b0-11ec-9cd7-3b4d61ca1d4f",
 					"levelId": 70,
 					"layerDefUid": 10,
