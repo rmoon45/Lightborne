@@ -2,8 +2,18 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use enum_map::EnumMap;
 
-use super::{HitByLight, LightColor, LightRaySource, LightSegment, LightSensor, LIGHT_SPEED};
+use super::{
+    sensor::{HitByLight, LightSensor},
+    LightColor, LightRaySource, LIGHT_SPEED,
+};
 use crate::shared::GroupLabel;
+
+#[derive(Component)]
+pub struct LightSegment {
+    start: Vec2,
+    end: Vec2,
+    pub color: LightColor,
+}
 
 #[derive(Resource, Default)]
 pub struct LightSegmentCache {
@@ -62,7 +72,6 @@ pub fn simulate_light_sources(
 
             if q_light_sensor.contains(entity) {
                 commands.entity(entity).insert(HitByLight);
-                break;
             };
 
             ray_pos = intersection.point;
@@ -114,9 +123,3 @@ pub fn tick_light_sources(mut q_light_sources: Query<&mut LightRaySource>) {
         source.time_traveled += LIGHT_SPEED;
     }
 }
-
-// pub fn clean_segments(mut commands: Commands, q_segment_meshes: Query<Entity, With<LightSegment>>) {
-//     for entity in q_segment_meshes.iter() {
-//         commands.entity(entity).despawn_recursive();
-//     }
-// }

@@ -1,16 +1,12 @@
 use bevy::{
     prelude::*,
     sprite::{AlphaMode2d, Material2dPlugin},
-    time::Stopwatch,
 };
-use bevy_rapier2d::prelude::*;
 
 use enum_map::Enum;
-use render::{insert_segment_meshes, LightMaterial, LightRenderData};
+use render::{insert_segment_meshes, LightMaterial};
 use segments::{simulate_light_sources, tick_light_sources, LightSegmentCache};
-use sensor::{clean_light_sensors, update_light_sensors};
-
-use crate::level::interactable::Interactable;
+use sensor::update_light_sensors;
 
 mod render;
 pub mod segments;
@@ -24,12 +20,10 @@ pub struct LightManagementPlugin;
 impl Plugin for LightManagementPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(Material2dPlugin::<LightMaterial>::default())
-            .init_resource::<LightRenderData>()
             .init_resource::<LightSegmentCache>()
             .add_systems(Update, simulate_light_sources)
             .add_systems(Update, insert_segment_meshes.after(simulate_light_sources))
             .add_systems(Update, update_light_sensors.after(simulate_light_sources))
-            .add_systems(Update, clean_light_sensors.after(update_light_sensors))
             .add_systems(FixedUpdate, tick_light_sources);
     }
 }
@@ -77,35 +71,4 @@ pub struct LightRaySource {
     pub start_dir: Vec2,
     pub time_traveled: f32,
     pub color: LightColor,
-}
-
-#[derive(Component)]
-#[component(storage = "SparseSet")]
-pub struct LightSegment {
-    start: Vec2,
-    end: Vec2,
-    color: LightColor,
-}
-
-#[derive(Default, Component)]
-#[component(storage = "SparseSet")]
-pub struct HitByLight;
-
-#[derive(Default, Component)]
-pub struct LightSensor {
-    /// Stores the cumulative time light has been hitting the sensor
-    pub cumulative_exposure: Stopwatch,
-
-    /// Timer that when finshed, indicates that light has been hitting this consecutively for the
-    /// timer's duration
-    pub activation_timer: Timer,
-}
-
-#[derive(Default, Bundle)]
-pub struct LightSensorBundle {
-    interactable: Interactable,
-    collider: Collider,
-    sensor: Sensor,
-    collision_groups: CollisionGroups,
-    light_interaction: LightSensor,
 }
