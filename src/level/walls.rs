@@ -170,7 +170,9 @@ pub fn spawn_wall_collision(
                             ))
                             .insert(CollisionGroups::new(
                                 GroupLabel::TERRAIN,
-                                GroupLabel::PLAYER_COLLIDER | GroupLabel::LIGHT_RAY,
+                                GroupLabel::PLAYER_COLLIDER
+                                    | GroupLabel::LIGHT_RAY
+                                    | GroupLabel::WHITE_RAY,
                             ))
                             .insert(RigidBody::Fixed)
                             .insert(Friction::new(1.0))

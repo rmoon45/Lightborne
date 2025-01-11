@@ -4,7 +4,7 @@ use bevy_rapier2d::prelude::*;
 
 use crate::shared::GroupLabel;
 
-use super::{movement::PlayerMovement, PlayerBundle, PlayerMarker};
+use super::{light::PlayerLightInventory, movement::PlayerMovement, PlayerBundle, PlayerMarker};
 
 pub fn init_player_bundle(_: &EntityInstance) -> PlayerBundle {
     PlayerBundle {
@@ -25,6 +25,7 @@ pub fn init_player_bundle(_: &EntityInstance) -> PlayerBundle {
             coefficient: 0.,
             combine_rule: CoefficientCombineRule::Min,
         },
+        light_inventory: PlayerLightInventory::default(),
     }
 }
 
@@ -39,7 +40,7 @@ pub fn add_player_sensors(mut commands: Commands, q_player: Query<Entity, Added<
             .insert(Sensor)
             .insert(CollisionGroups::new(
                 GroupLabel::PLAYER_SENSOR,
-                GroupLabel::HURT_SENSOR,
+                GroupLabel::HURT_BOX,
             ))
             .insert(PointLight {
                 intensity: 100_000.0,
