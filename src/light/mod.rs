@@ -8,7 +8,7 @@ use render::{insert_segment_meshes, LightMaterial};
 use segments::{
     cleanup_light_sources, simulate_light_sources, tick_light_sources, LightSegmentCache,
 };
-use sensor::update_light_sensors;
+use sensor::{reset_light_sensors, update_light_sensors};
 
 mod render;
 pub mod segments;
@@ -26,7 +26,8 @@ impl Plugin for LightManagementPlugin {
             .add_systems(Update, simulate_light_sources)
             .add_systems(Update, insert_segment_meshes.after(simulate_light_sources))
             .add_systems(Update, update_light_sensors.after(simulate_light_sources))
-            .add_systems(Update, cleanup_light_sources)
+            .add_systems(Update, cleanup_light_sources.before(simulate_light_sources))
+            .add_systems(Update, reset_light_sensors.before(update_light_sensors))
             .add_systems(FixedUpdate, tick_light_sources);
     }
 }

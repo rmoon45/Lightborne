@@ -28,11 +28,7 @@ impl FromWorld for LightSegmentCache {
         };
 
         for (color, segments) in cache.table.iter_mut() {
-            let num_segments = match color {
-                LightColor::Red => 3,
-                _ => 2,
-            };
-            while segments.len() < num_segments {
+            while segments.len() < color.num_bounces() + 1 {
                 segments.push(world.spawn(()).id())
             }
         }

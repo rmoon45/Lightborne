@@ -4,6 +4,7 @@ use bevy_ecs_ldtk::prelude::*;
 use super::{
     activatable::{init_activatable, update_activatables, Activatable, Activated},
     entity::FixedEntityBundle,
+    LevelSwitchEvent,
 };
 
 pub struct CrystalPlugin;
@@ -15,7 +16,8 @@ impl Plugin for CrystalPlugin {
             .add_systems(
                 Update,
                 (on_crystal_added, on_crystal_changed).after(update_activatables),
-            );
+            )
+            .add_systems(Update, reset_crystals);
     }
 }
 
@@ -45,6 +47,25 @@ pub fn on_crystal_added(
         if !activatable.init_active {
             sprite.color = Color::srgba(1.0, 1.0, 1.0, 0.1);
             commands.entity(entity).remove::<FixedEntityBundle>();
+        }
+    }
+}
+
+pub fn reset_crystals(
+    mut commands: Commands,
+    mut ev_level_switch: EventReader<LevelSwitchEvent>,
+    mut q_crystals: Query<(Entity, &Activatable), With<Crystal>>,
+) {
+    if ev_level_switch.is_empty() {
+        return;
+    }
+    ev_level_switch.clear();
+
+    for (entity, activatable) in q_crystals.iter_mut() {
+        if activatable.init_active {
+            commands.entity(entity).insert(Activated);
+        } else {
+            commands.entity(entity).remove::<Activated>();
         }
     }
 }
