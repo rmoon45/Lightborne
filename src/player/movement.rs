@@ -9,7 +9,7 @@ const JUMP_BOOST_TICKS: isize = 2;
 
 const PLAYER_MAX_H_VEL: f32 = 1.5;
 const PLAYER_MAX_Y_VEL: f32 = 5.;
-const PLAYER_JUMP_VEL: f32 = 2.3;
+const PLAYER_JUMP_VEL: f32 = 2.2;
 const PLAYER_MOVE_VEL: f32 = 0.6;
 const PLAYER_GRAVITY: f32 = 0.15;
 

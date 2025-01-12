@@ -47,7 +47,5 @@ pub fn init_start_marker(
         commands.entity(entity).insert(StartFlag {
             level_iid: level_iid.to_string(),
         });
-
-        dbg!("Init start flag for", level_iid.to_string());
     }
 }

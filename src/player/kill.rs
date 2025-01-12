@@ -33,8 +33,6 @@ pub fn reset_player_position(
                 instance.world_x.expect("Lightborne uses Free world layout") as f32;
             transform.translation.y =
                 -instance.world_y.expect("Lightborne uses Free world layout") as f32;
-
-            dbg!(transform.translation);
             return;
         }
     }
