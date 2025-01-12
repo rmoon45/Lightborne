@@ -164,6 +164,7 @@ pub fn cleanup_light_sources(
             commands
                 .entity(*entity)
                 .remove::<LightSegmentRenderBundle>()
+                .remove::<Collider>()
                 .remove::<LightSegment>();
         }
     });

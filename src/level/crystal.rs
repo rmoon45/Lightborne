@@ -41,8 +41,9 @@ pub fn on_crystal_added(
 ) {
     // Fix crystals that start inactive
     for (entity, mut sprite, activatable) in q_new.iter_mut() {
+        sprite.color = Color::srgba(1.3, 1.3, 1.3, 1.0);
         if !activatable.init_active {
-            sprite.color.set_alpha(0.1);
+            sprite.color = Color::srgba(1.0, 1.0, 1.0, 0.1);
             commands.entity(entity).remove::<FixedEntityBundle>();
         }
     }
@@ -59,7 +60,7 @@ pub fn on_crystal_changed(
         let Ok((entity, mut sprite, instance)) = q_crystals.get_mut(entity) else {
             continue;
         };
-        sprite.color.set_alpha(1.0);
+        sprite.color = Color::srgba(1.3, 1.3, 1.3, 1.0);
         commands
             .entity(entity)
             .insert(FixedEntityBundle::from(instance));
@@ -68,7 +69,7 @@ pub fn on_crystal_changed(
         let Ok((entity, mut sprite, _)) = q_crystals.get_mut(entity) else {
             continue;
         };
-        sprite.color.set_alpha(0.1);
+        sprite.color = Color::srgba(1.0, 1.0, 1.0, 0.1);
         commands.entity(entity).remove::<FixedEntityBundle>();
     }
 }
