@@ -33,7 +33,8 @@ pub struct Activated;
 
 #[derive(Default, Resource)]
 pub struct ActivatableCache {
-    table: std::collections::HashMap<i32, Vec<Entity>>,
+    // FIXME: separate activatables by room
+    table: std::collections::HashMap<i32, std::collections::HashSet<Entity>>,
 }
 
 #[derive(Event)]
@@ -44,7 +45,7 @@ pub struct GroupTriggeredEvent {
 pub fn update_activatables(
     mut commands: Commands,
     mut ev_group_triggered: EventReader<GroupTriggeredEvent>,
-    activatable_cache: Res<ActivatableCache>,
+    mut activatable_cache: ResMut<ActivatableCache>,
     q_activated: Query<&Activated>,
 ) {
     for event in ev_group_triggered.read() {
@@ -53,12 +54,25 @@ pub fn update_activatables(
             continue;
         }
 
+        let mut to_remove: Vec<Entity> = vec![];
         for &entity in activatable_cache.table[&id].iter() {
+            if commands.get_entity(entity).is_none() {
+                to_remove.push(entity);
+                continue;
+            }
+
             if let Ok(_) = q_activated.get(entity) {
                 commands.entity(entity).remove::<Activated>();
             } else {
                 commands.entity(entity).insert(Activated);
             }
+        }
+        for entity in to_remove.iter() {
+            activatable_cache
+                .table
+                .get_mut(&id)
+                .expect("Entry exists in hashmap if we are updating its entries")
+                .remove(entity);
         }
     }
 }
@@ -92,6 +106,6 @@ pub fn setup_activatables(
             .table
             .entry(activatable.id)
             .or_default()
-            .push(entity);
+            .insert(entity);
     }
 }

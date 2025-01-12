@@ -3,10 +3,11 @@ use bevy_rapier2d::prelude::*;
 use enum_map::EnumMap;
 
 use super::{
+    render::LightSegmentRenderBundle,
     sensor::{HitByLight, LightSensor},
     LightColor, LightRaySource, LIGHT_SPEED,
 };
-use crate::shared::GroupLabel;
+use crate::{level::LevelSwitchEvent, shared::GroupLabel};
 
 #[derive(Component)]
 pub struct LightSegment {
@@ -15,9 +16,29 @@ pub struct LightSegment {
     pub color: LightColor,
 }
 
-#[derive(Resource, Default)]
+#[derive(Resource)]
 pub struct LightSegmentCache {
     table: EnumMap<LightColor, Vec<Entity>>,
+}
+
+impl FromWorld for LightSegmentCache {
+    fn from_world(world: &mut World) -> Self {
+        let mut cache = LightSegmentCache {
+            table: EnumMap::default(),
+        };
+
+        for (color, segments) in cache.table.iter_mut() {
+            let num_segments = match color {
+                LightColor::Red => 3,
+                _ => 2,
+            };
+            while segments.len() < num_segments {
+                segments.push(world.spawn(()).id())
+            }
+        }
+
+        cache
+    }
 }
 
 pub fn simulate_light_sources(
@@ -25,7 +46,7 @@ pub fn simulate_light_sources(
     q_light_sources: Query<&LightRaySource>,
     mut q_rapier: Query<&mut RapierContext>,
     q_light_sensor: Query<&LightSensor>,
-    mut segment_cache: ResMut<LightSegmentCache>,
+    segment_cache: Res<LightSegmentCache>,
 ) {
     let Ok(rapier_context) = q_rapier.get_single_mut() else {
         return;
@@ -79,10 +100,6 @@ pub fn simulate_light_sources(
             ray_qry = ray_qry.exclude_collider(entity);
         }
 
-        while segment_cache.table[source.color].len() < pts.len() - 1 {
-            segment_cache.table[source.color].push(commands.spawn(()).id());
-        }
-
         for (i, pair) in pts.windows(2).enumerate() {
             let segment = LightSegment {
                 start: pair[0],
@@ -122,4 +139,32 @@ pub fn tick_light_sources(mut q_light_sources: Query<&mut LightRaySource>) {
     for mut source in q_light_sources.iter_mut() {
         source.time_traveled += LIGHT_SPEED;
     }
+}
+
+pub fn cleanup_light_sources(
+    mut commands: Commands,
+    q_light_sources: Query<Entity, With<LightRaySource>>,
+    mut ev_level_switch: EventReader<LevelSwitchEvent>,
+    segment_cache: Res<LightSegmentCache>,
+) {
+    if ev_level_switch.is_empty() {
+        return;
+    }
+    ev_level_switch.clear();
+
+    // FIXME: should make these entities children of the level so that they are despawned
+    // automagically (?)
+
+    for entity in q_light_sources.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
+
+    segment_cache.table.iter().for_each(|(_, items)| {
+        for entity in items.iter() {
+            commands
+                .entity(*entity)
+                .remove::<LightSegmentRenderBundle>()
+                .remove::<LightSegment>();
+        }
+    });
 }

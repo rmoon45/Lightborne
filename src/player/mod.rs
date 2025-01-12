@@ -7,10 +7,12 @@ use bevy_rapier2d::prelude::*;
 
 use crate::input::update_cursor_world_coords;
 
+use kill::{reset_player_on_level_switch, reset_player_position, KillPlayerEvent};
 use light::{handle_color_switch, preview_light_path, shoot_light, PlayerLightInventory};
 use movement::{move_player, queue_jump, PlayerMovement};
 use spawn::{add_player_sensors, init_player_bundle};
 
+mod kill;
 pub mod light;
 pub mod movement;
 mod spawn;
@@ -18,7 +20,8 @@ mod spawn;
 pub struct PlayerManagementPlugin;
 impl Plugin for PlayerManagementPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, add_player_sensors) // ran when LDTK spawns the player
+        app.add_event::<KillPlayerEvent>()
+            .add_systems(Update, add_player_sensors) // ran when LDTK spawns the player
             .add_systems(FixedUpdate, move_player)
             .add_systems(
                 Update,
@@ -35,6 +38,12 @@ impl Plugin for PlayerManagementPlugin {
                 )
                     .after(handle_color_switch)
                     .after(update_cursor_world_coords),
+            )
+            .add_systems(Update, reset_player_on_level_switch)
+            .add_systems(Update, reset_player_position)
+            .add_systems(
+                Update,
+                quick_reset.run_if(input_just_pressed(KeyCode::KeyR)),
             );
     }
 }
@@ -50,9 +59,9 @@ pub struct PlayerBundle {
     controller_output: KinematicCharacterControllerOutput,
     collider: Collider,
     collision_groups: CollisionGroups,
-    player_movement: PlayerMovement,
     friction: Friction,
     restitution: Restitution,
+    player_movement: PlayerMovement,
     light_inventory: PlayerLightInventory,
 }
 
@@ -65,4 +74,10 @@ pub struct LdtkPlayerBundle {
     sprite: Sprite,
     #[worldly]
     worldly: Worldly,
+    #[from_entity_instance]
+    instance: EntityInstance,
+}
+
+fn quick_reset(mut ev_kill_player: EventWriter<KillPlayerEvent>) {
+    ev_kill_player.send(KillPlayerEvent);
 }
