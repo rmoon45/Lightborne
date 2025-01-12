@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy::window::PresentMode;
 use bevy_rapier2d::prelude::*;
 
-use camera::setup_camera;
+use camera::CameraPlugin;
 use input::{init_cursor_world_coords, update_cursor_world_coords};
 use level::LevelManagementPlugin;
 use light::LightManagementPlugin;
@@ -47,7 +47,7 @@ fn main() {
         .add_plugins(PlayerManagementPlugin)
         .add_plugins(LevelManagementPlugin)
         .add_plugins(LightManagementPlugin)
-        .add_systems(Startup, setup_camera)
+        .add_plugins(CameraPlugin)
         .add_systems(Startup, init_cursor_world_coords)
         .add_systems(Update, update_cursor_world_coords)
         .run();

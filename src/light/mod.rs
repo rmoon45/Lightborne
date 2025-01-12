@@ -5,7 +5,9 @@ use bevy::{
 
 use enum_map::Enum;
 use render::{insert_segment_meshes, LightMaterial};
-use segments::{simulate_light_sources, tick_light_sources, LightSegmentCache};
+use segments::{
+    cleanup_light_sources, simulate_light_sources, tick_light_sources, LightSegmentCache,
+};
 use sensor::update_light_sensors;
 
 mod render;
@@ -24,6 +26,7 @@ impl Plugin for LightManagementPlugin {
             .add_systems(Update, simulate_light_sources)
             .add_systems(Update, insert_segment_meshes.after(simulate_light_sources))
             .add_systems(Update, update_light_sensors.after(simulate_light_sources))
+            .add_systems(Update, cleanup_light_sources)
             .add_systems(FixedUpdate, tick_light_sources);
     }
 }
