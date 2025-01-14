@@ -3,17 +3,22 @@ use bevy_rapier2d::prelude::*;
 use enum_map::EnumMap;
 
 use super::{
-    render::LightSegmentRenderBundle,
+    render::{LightMaterial, LightRenderData},
     sensor::{HitByLight, LightSensor},
     LightColor, LightRaySource, LIGHT_SPEED,
 };
 use crate::{level::LevelSwitchEvent, shared::GroupLabel};
 
-#[derive(Component)]
-pub struct LightSegment {
-    start: Vec2,
-    end: Vec2,
-    pub color: LightColor,
+#[derive(Default, Component, Clone, Debug)]
+pub struct LightSegmentMarker;
+
+#[derive(Bundle, Debug, Default, Clone)]
+pub struct LightSegmentBundle {
+    pub marker: LightSegmentMarker,
+    pub mesh: Mesh2d,
+    pub material: MeshMaterial2d<LightMaterial>,
+    pub visibility: Visibility,
+    pub transform: Transform,
 }
 
 #[derive(Resource)]
@@ -26,10 +31,37 @@ impl FromWorld for LightSegmentCache {
         let mut cache = LightSegmentCache {
             table: EnumMap::default(),
         };
+        let render_data = world.resource::<LightRenderData>();
+
+        let mut segment_bundles: EnumMap<LightColor, LightSegmentBundle> = EnumMap::default();
+
+        for (color, _) in cache.table.iter_mut() {
+            segment_bundles[color] = LightSegmentBundle {
+                marker: LightSegmentMarker,
+                mesh: render_data.mesh.clone(),
+                material: render_data.material_map[color].clone(),
+                visibility: Visibility::Visible,
+                transform: Transform::default(),
+            }
+        }
 
         for (color, segments) in cache.table.iter_mut() {
             while segments.len() < color.num_bounces() + 1 {
-                segments.push(world.spawn(()).id())
+                let mut cmds = world.spawn(());
+                cmds.insert(segment_bundles[color].clone());
+
+                if color == LightColor::White {
+                    cmds.insert((
+                        Collider::cuboid(0.5, 0.5),
+                        Sensor,
+                        CollisionGroups::new(
+                            GroupLabel::WHITE_RAY,
+                            GroupLabel::TERRAIN | GroupLabel::LIGHT_SENSOR | GroupLabel::LIGHT_RAY,
+                        ),
+                    ));
+                }
+
+                segments.push(cmds.id());
             }
         }
 
@@ -42,6 +74,7 @@ pub fn simulate_light_sources(
     q_light_sources: Query<&LightRaySource>,
     mut q_rapier: Query<&mut RapierContext>,
     q_light_sensor: Query<&LightSensor>,
+    mut q_segments: Query<(&mut Transform, &mut Visibility), With<LightSegmentMarker>>,
     segment_cache: Res<LightSegmentCache>,
 ) {
     let Ok(rapier_context) = q_rapier.get_single_mut() else {
@@ -97,36 +130,21 @@ pub fn simulate_light_sources(
         }
 
         for (i, pair) in pts.windows(2).enumerate() {
-            let segment = LightSegment {
-                start: pair[0],
-                end: pair[1],
-                color: source.color,
-            };
-
-            let midpoint = segment.start.midpoint(segment.end).extend(1.0);
-            let scale = Vec3::new(segment.start.distance(segment.end), 1., 1.);
-            let rotation = (segment.end - segment.start).to_angle();
+            let midpoint = pair[0].midpoint(pair[1]).extend(1.0);
+            let scale = Vec3::new(pair[0].distance(pair[1]), 1., 1.);
+            let rotation = (pair[1] - pair[0]).to_angle();
             let transform = Transform::from_translation(midpoint)
                 .with_scale(scale)
                 .with_rotation(Quat::from_rotation_z(rotation));
 
-            commands
-                .entity(segment_cache.table[source.color][i])
-                .insert(segment)
-                .insert(transform);
+            let Ok((mut c_transform, mut c_visibility)) =
+                q_segments.get_mut(segment_cache.table[source.color][i])
+            else {
+                panic!("Segment did not have visibility or transform");
+            };
 
-            if source.color == LightColor::White {
-                commands
-                    .entity(segment_cache.table[source.color][i])
-                    .insert((
-                        Collider::cuboid(0.5, 0.5),
-                        Sensor,
-                        CollisionGroups::new(
-                            GroupLabel::WHITE_RAY,
-                            GroupLabel::TERRAIN | GroupLabel::LIGHT_SENSOR | GroupLabel::LIGHT_RAY,
-                        ),
-                    ));
-            }
+            *c_transform = transform;
+            *c_visibility = Visibility::Visible;
         }
     }
 }
@@ -142,6 +160,7 @@ pub fn cleanup_light_sources(
     q_light_sources: Query<Entity, With<LightRaySource>>,
     mut ev_level_switch: EventReader<LevelSwitchEvent>,
     segment_cache: Res<LightSegmentCache>,
+    mut q_segments: Query<(&mut Transform, &mut Visibility), With<LightSegmentMarker>>,
 ) {
     if ev_level_switch.is_empty() {
         return;
@@ -156,12 +175,13 @@ pub fn cleanup_light_sources(
     }
 
     segment_cache.table.iter().for_each(|(_, items)| {
-        for entity in items.iter() {
-            commands
-                .entity(*entity)
-                .remove::<LightSegmentRenderBundle>()
-                .remove::<Collider>()
-                .remove::<LightSegment>();
+        for &entity in items.iter() {
+            let (mut transform, mut visibility) = q_segments
+                .get_mut(entity)
+                .expect("Segment should have visibility");
+
+            *transform = Transform::default();
+            *visibility = Visibility::Hidden;
         }
     });
 }

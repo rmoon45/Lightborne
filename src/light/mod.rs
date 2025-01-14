@@ -4,7 +4,7 @@ use bevy::{
 };
 
 use enum_map::Enum;
-use render::{insert_segment_meshes, LightMaterial};
+use render::{LightMaterial, LightRenderData};
 use segments::{
     cleanup_light_sources, simulate_light_sources, tick_light_sources, LightSegmentCache,
 };
@@ -22,9 +22,9 @@ pub struct LightManagementPlugin;
 impl Plugin for LightManagementPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(Material2dPlugin::<LightMaterial>::default())
+            .init_resource::<LightRenderData>()
             .init_resource::<LightSegmentCache>()
             .add_systems(Update, simulate_light_sources)
-            .add_systems(Update, insert_segment_meshes.after(simulate_light_sources))
             .add_systems(Update, update_light_sensors.after(simulate_light_sources))
             .add_systems(Update, cleanup_light_sources.before(simulate_light_sources))
             .add_systems(Update, reset_light_sensors.before(update_light_sensors))
@@ -32,7 +32,7 @@ impl Plugin for LightManagementPlugin {
     }
 }
 
-#[derive(Enum, Clone, Copy, Default, PartialEq)]
+#[derive(Enum, Clone, Copy, Default, PartialEq, Debug)]
 pub enum LightColor {
     #[default]
     Green,
