@@ -22,7 +22,7 @@ Require the player to fire a light beam before moving onto the next section.
 
 https://github.com/user-attachments/assets/d5a0a65c-1393-439d-9f8e-503c8a8b9ba9
 
-Introduce another level of thinking: require the player to first 
+Introduce another level of thinking: require the player to place the white beam in a way that transforms the level.
 
 ## Clock mechanic
 
