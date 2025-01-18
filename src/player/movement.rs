@@ -56,7 +56,7 @@ pub fn move_player(
         // Jump was cut
         player.velocity.y = PLAYER_GRAVITY;
         player.jump_boost_ticks_remaining = 0;
-    } else if output.desired_translation.y - output.effective_translation.y > 0.05 {
+    } else if output.desired_translation.y > 0. && output.effective_translation.y < 0.05 {
         // Bonked head onto wall
         player.velocity.y = 0.;
         player.jump_boost_ticks_remaining = 0;
