@@ -123,34 +123,11 @@ We want every one of you to be able to make and test changes to the level withou
 
 - Copy the `lightborne.ldtk` file from `assets/levels/lightborne.ldtk` to `assets/levels/<firstname>-<lastname>.ldtk`
     - See my example already in the folder!
-- Copy `src/level/setup_example.rs` to `src/level/setup.rs`. You will also need to make two changes in the file:
-    ```rust
-    impl Plugin for LevelSetupPlugin {
-        fn build(&self, app: &mut App) {
-            app.insert_resource(LevelSelection::index(3))
-                // CHANGEME:                          ^
-                // Change this if you want to start in a different level. Note that the "Lyra" entity
-                // should be present in this level.
-                .add_systems(Startup, setup_level);
-        }
-    }
-    ```
-    ```rust
-    fn setup_level(mut commands: Commands, asset_server: Res<AssetServer>) {
-        commands.spawn(LdtkWorldBundle {
-            ldtk_handle: asset_server.load("levels/lightborne.ldtk").into(),
-            // CHANGEME:                           ^
-            // Change this to the name of your own level file (likely
-            // levels/<firstname>-<lastname>.ldtk)
-            ..Default::default()
-        });
-    }
-    ```
+- Copy `Lightborne_example.toml` to `Lightborne.toml`. In `Lightborne.toml`, inside the `[level_config]` table:
+    - change `level_index` to the level you want the game to start in
+    - change `level_path` to the path to the `.ldtk` file you just created
+    - (As an aside: you are free to modify Lightborne.toml, but the changes to this file shouldn't be included in your commit because it is in `.gitignore`).
 - Once you have done these things, then you can make edits to your own LDTK file. Try and paint some new tiles, **save**, and run again with `cargo r`.
-
-### Notes
-
-- I have added the `src/level/setup.rs` file to `.gitignore`. This means that you should not include this file when you make a commit! This will prevent us from getting merge conflicts in this file.
 
 ## Contributing
 

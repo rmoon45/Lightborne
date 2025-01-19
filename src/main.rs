@@ -5,12 +5,14 @@ use bevy::window::PresentMode;
 use bevy_rapier2d::prelude::*;
 
 use camera::CameraPlugin;
+use config::ConfigPlugin;
 use input::{init_cursor_world_coords, update_cursor_world_coords};
 use level::LevelManagementPlugin;
 use light::LightManagementPlugin;
 use player::PlayerManagementPlugin;
 
 mod camera;
+mod config;
 mod input;
 mod level;
 mod light;
@@ -40,6 +42,7 @@ fn main() {
                 ..default()
             });
         })
+        .add_plugins(ConfigPlugin)
         .add_plugins(LogDiagnosticsPlugin::default())
         .add_plugins(FrameTimeDiagnosticsPlugin)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(8.0))
