@@ -7,8 +7,11 @@ use enum_map::{enum_map, EnumMap};
 
 use super::{LightColor, LIGHT_SEGMENT_THICKNESS};
 
+/// The path to the shader used by the [`LightMaterial`]
 const LIGHT_SHADER_PATH: &str = "shaders/light.wgsl";
 
+/// A resource that stored handles to the [`Mesh2d`] and [`MeshMaterial2d`] used in the rendering
+/// of [`LightSegment`](super::segments::LightSegmentBundle)s.
 #[derive(Resource)]
 pub struct LightRenderData {
     pub mesh: Mesh2d,
@@ -16,6 +19,7 @@ pub struct LightRenderData {
 }
 
 impl FromWorld for LightRenderData {
+    /// Initializes the [`LightRenderData`] [`Resource`] from the [`World`], before the app runs.
     fn from_world(world: &mut World) -> Self {
         let mut meshes = world.resource_mut::<Assets<Mesh>>();
         let mesh_handle = meshes
@@ -35,6 +39,8 @@ impl FromWorld for LightRenderData {
     }
 }
 
+/// Custom [`Material2d`] that will use our custom WGSL shader to draw
+/// [`LightSegment`](super::segments::LightSegmentBundle)s.
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct LightMaterial {
     #[uniform(0)]

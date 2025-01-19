@@ -9,9 +9,11 @@ use super::{
 };
 use crate::{level::LevelSwitchEvent, shared::GroupLabel};
 
+/// Marker [`Component`] used to query for light segments.
 #[derive(Default, Component, Clone, Debug)]
 pub struct LightSegmentMarker;
 
+/// [`Bundle`] used in the initialization of the [`LightSegmentCache`] to spawn segment entities.
 #[derive(Bundle, Debug, Default, Clone)]
 pub struct LightSegmentBundle {
     pub marker: LightSegmentMarker,
@@ -21,6 +23,8 @@ pub struct LightSegmentBundle {
     pub transform: Transform,
 }
 
+/// [`Resource`] used to store [`Entity`] handles to the light segments so they aren't added and
+/// despawned every frame. See [`simulate_light_sources`] for details.
 #[derive(Resource)]
 pub struct LightSegmentCache {
     table: EnumMap<LightColor, Vec<Entity>>,
@@ -50,6 +54,7 @@ impl FromWorld for LightSegmentCache {
                 let mut cmds = world.spawn(());
                 cmds.insert(segment_bundles[color].clone());
 
+                // White beams need colliders
                 if color == LightColor::White {
                     cmds.insert((
                         Collider::cuboid(0.5, 0.5),
@@ -69,6 +74,16 @@ impl FromWorld for LightSegmentCache {
     }
 }
 
+/// [`System`] that runs on [`Update`], calculating the [`Transform`] of light segments from the
+/// corresponding [`LightRaySource`]. Note that this calculation happens every frame, so instead of
+/// rapidly spawning/despawning the entities, we spawn them and cache them in the
+/// [`LightSegmentCache`], then modify their [`Visibility`] and [`Transform`]s.
+///
+/// If needed, optimization work can be done by recalculating only segments that are currently
+/// changing (segments already "stabilized" usually won't move).
+///
+/// Similar logic is duplicated in [`preview_light_path`](crate::player::light::preview_light_path),
+/// these two systems should be merged.
 pub fn simulate_light_sources(
     mut commands: Commands,
     q_light_sources: Query<&LightRaySource>,
@@ -149,12 +164,15 @@ pub fn simulate_light_sources(
     }
 }
 
+/// [`System`] that runs on [`FixedUpdate`], advancing the distance the light beam can travel.
 pub fn tick_light_sources(mut q_light_sources: Query<&mut LightRaySource>) {
     for mut source in q_light_sources.iter_mut() {
         source.time_traveled += LIGHT_SPEED;
     }
 }
 
+/// [`System`] that is responsible for hiding all of the [`LightSegment`](LightSegmentBundle)s
+/// and despawning [`LightRaySource`]s when the level changes.
 pub fn cleanup_light_sources(
     mut commands: Commands,
     q_light_sources: Query<Entity, With<LightRaySource>>,

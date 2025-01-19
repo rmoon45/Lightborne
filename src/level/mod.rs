@@ -19,6 +19,7 @@ pub mod misc;
 mod setup;
 mod walls;
 
+/// [`Plugin`] that handles everything related to the level.
 pub struct LevelManagementPlugin;
 
 impl Plugin for LevelManagementPlugin {
@@ -45,12 +46,17 @@ impl Plugin for LevelManagementPlugin {
     }
 }
 
+/// [`Resource`] that holds the `level_iid` of the current level.
 #[derive(Default, Resource)]
 pub struct CurrentLevel(pub String);
 
+/// [`Event`] that will be sent to inform other systems that the level is switching and should be
+/// reinitialized.
 #[derive(Event)]
 pub struct LevelSwitchEvent;
 
+/// [`System`] that will run on [`Update`] to check if the Player has moved to another level. If
+/// the player has, then a [`LevelSwitchEvent`] will be sent out to notify other systems.
 fn switch_level(
     q_player: Query<(&Transform, &EntityInstance), With<PlayerMarker>>,
     q_level: Query<&LevelIid>,

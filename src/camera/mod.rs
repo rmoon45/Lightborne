@@ -4,6 +4,7 @@ use bevy::{
     render::camera::ScalingMode,
 };
 
+/// The [`Plugin`] responsible for handling anything Camera related.
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
@@ -14,12 +15,34 @@ impl Plugin for CameraPlugin {
     }
 }
 
+/// Marker [`Component`] used to query for the main (and currently only) camera in the world.
+///
+/// Your query might look like this:
+/// ```rust
+/// Query<&Transform, With<MainCamera>>
+/// ```
 #[derive(Component, Default)]
 pub struct MainCamera;
 
+/// [`Event`] struct used to request the camera move to a certain position, from another part of the
+/// code.
+///
+/// Example usage:
+/// ```rust
+/// fn my_system(
+///     mut ev_move_camera: EventWriter<MoveCameraEvent>,
+/// ) {
+///     ev_move_camera.send(MoveCameraEvent(Vec2::ZERO)); // will move the camera to 0, 0
+/// }
+/// ```
 #[derive(Event)]
 pub struct MoveCameraEvent(pub Vec2);
 
+/// [`Startup`] [`System`] that spawns the [`Camera2d`] in the world.
+///
+/// Notes:
+/// - Spawns the camera with hardcoded position 160, -94
+/// - Spawns the camera with [`OrthographicProjection`] with fixed scaling at 320x180
 fn setup_camera(mut commands: Commands) {
     commands
         .spawn(Camera2d)
@@ -40,6 +63,8 @@ fn setup_camera(mut commands: Commands) {
         .insert(Transform::from_xyz(160., -94., 0.));
 }
 
+/// [`System`] that responds to [`MoveCameraEvent`] events. Will assign the value of the latest event
+/// read this frame to the [`MainCamera`]'s [`Transform`].
 pub fn move_camera(
     mut q_camera: Query<&mut Transform, With<MainCamera>>,
     mut ev_move_camera: EventReader<MoveCameraEvent>,

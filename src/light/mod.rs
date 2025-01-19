@@ -14,9 +14,13 @@ mod render;
 pub mod segments;
 pub mod sensor;
 
+/// The speed of the light beam in units per [`FixedUpdate`].
 const LIGHT_SPEED: f32 = 10.0;
+
+/// The width of the rectangle used to represent [`LightSegment`](segments::LightSegmentBundle)s.
 const LIGHT_SEGMENT_THICKNESS: f32 = 3.0;
 
+/// [`Plugin`] that manages everything light related.
 pub struct LightManagementPlugin;
 
 impl Plugin for LightManagementPlugin {
@@ -32,6 +36,7 @@ impl Plugin for LightManagementPlugin {
     }
 }
 
+/// [`Enum`] for each of the light colors.
 #[derive(Enum, Clone, Copy, Default, PartialEq, Debug)]
 pub enum LightColor {
     #[default]
@@ -40,6 +45,8 @@ pub enum LightColor {
     White,
 }
 
+/// [`Color`] corresponding to each of the [`LightColor`]s. Note that the color values are greater
+/// than 1.0 to take advantage of bloom.
 impl From<LightColor> for Color {
     fn from(light_color: LightColor) -> Self {
         match light_color {
@@ -50,6 +57,7 @@ impl From<LightColor> for Color {
     }
 }
 
+/// [`LightMaterial`] corresponding to each of the [`LightColor`]s.
 impl From<LightColor> for LightMaterial {
     fn from(light_color: LightColor) -> Self {
         let color = Color::from(light_color);
@@ -61,6 +69,7 @@ impl From<LightColor> for LightMaterial {
 }
 
 impl LightColor {
+    /// The number of bounces off of terrain each [`LightColor`] can make.
     pub fn num_bounces(&self) -> usize {
         match self {
             LightColor::Red => 2,
@@ -69,6 +78,9 @@ impl LightColor {
     }
 }
 
+/// A [`Component`] marking the start of a light ray. These are spawned in
+/// [`shoot_light`](crate::player::light::shoot_light), and simulated in
+/// [`simulate_light_sources`](segments::simulate_light_sources).
 #[derive(Component)]
 pub struct LightRaySource {
     pub start_pos: Vec2,

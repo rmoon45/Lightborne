@@ -5,9 +5,12 @@ use crate::level::{misc::StartFlag, CurrentLevel, LevelSwitchEvent};
 
 use super::{light::PlayerLightInventory, movement::PlayerMovement, PlayerMarker};
 
+/// [`Event`] that is sent when the player should die.
 #[derive(Event)]
 pub struct KillPlayerEvent;
 
+/// [`System`] that listens to [`KillPlayerEvent`]s, and resets the player position. Also sends a
+/// [`LevelSwitchEvent`] to trigger a reinitialization of the room (should this be changed)?.
 pub fn reset_player_position(
     mut q_player: Query<&mut Transform, With<PlayerMarker>>,
     mut ev_kill_events: EventReader<KillPlayerEvent>,
@@ -40,6 +43,7 @@ pub fn reset_player_position(
     panic!("Couldn't find start flag to respawn at");
 }
 
+/// Resets the player inventory and movement information on a [`LevelSwitchEvent`]
 pub fn reset_player_on_level_switch(
     mut q_player: Query<(&mut PlayerMovement, &mut PlayerLightInventory), With<PlayerMarker>>,
     mut ev_level_switch: EventReader<LevelSwitchEvent>,

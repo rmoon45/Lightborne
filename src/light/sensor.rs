@@ -12,14 +12,21 @@ use crate::{
     shared::GroupLabel,
 };
 
+/// [`Component`] used to mark components that have been hit by light. The current design of the
+/// system is very bad, an event like `HitByLightEvent(Entity)` should be used instead to signal
+/// the [`LightSensor`]s to activate.
 #[derive(Default, Component)]
 #[component(storage = "SparseSet")]
 pub struct HitByLight;
 
+/// [`Component`] added to entities receptive to light. The
+/// [`activation_timer`](LightSensor::activation_timer) should be initialized in the
+/// `From<&EntityInstance>` implemenation for the [`LightSensorBundle`], if not default.
 #[derive(Component)]
 pub struct LightSensor {
     /// Stores the cumulative time light has been hitting the sensor
     pub cumulative_exposure: Stopwatch,
+    /// The amount of time the light beam needs to be hitting the sensor for activation
     pub activation_timer: Timer,
     /// Whether or not the sensor was hit the previous frame
     pub was_hit: bool,
@@ -38,6 +45,8 @@ impl Default for LightSensor {
     }
 }
 
+/// [`Bundle`] that includes all the [`Component`]s needed for a [`LightSensor`] to function
+/// properly.
 #[derive(Default, Bundle)]
 pub struct LightSensorBundle {
     interactable: Interactable,
@@ -65,6 +74,7 @@ impl From<&EntityInstance> for LightSensorBundle {
     }
 }
 
+/// [`System`] that resets the [`LightSensor`]s when a [`LevelSwitchEvent`] is received.
 pub fn reset_light_sensors(
     mut q_sensors: Query<&mut LightSensor>,
     mut ev_level_switch: EventReader<LevelSwitchEvent>,
@@ -82,6 +92,9 @@ pub fn reset_light_sensors(
     }
 }
 
+/// [`System`] that queries [`LightSensor`]s for [`HitByLight`] markers added when light hits
+/// a light sensor, and immediately removes them. As mentioned in [`HitByLight`], this design
+/// pattern isn't the best, and the [`Event`]-based one should be implemented instead.
 pub fn update_light_sensors(
     mut commands: Commands,
     mut q_non_interactions: Query<(&mut LightSensor, &Interactable), Without<HitByLight>>,

@@ -17,7 +17,9 @@ pub mod light;
 pub mod movement;
 mod spawn;
 
+/// [`Plugin`] for anything player based.
 pub struct PlayerManagementPlugin;
+
 impl Plugin for PlayerManagementPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<KillPlayerEvent>()
@@ -48,10 +50,12 @@ impl Plugin for PlayerManagementPlugin {
     }
 }
 
-/// To signal our own code to finish the initialization of the player (adding sensors, etc)
+/// [`Component`] to signal our own code to finish the initialization of the player (adding sensors, etc)
 #[derive(Component, Default)]
 pub struct PlayerMarker;
 
+/// [`Bundle`] that will be initialized with [`init_player_bundle`] and inserted to the player
+/// [`Entity`] by Ldtk.
 #[derive(Default, Bundle)]
 pub struct PlayerBundle {
     body: RigidBody,
@@ -65,6 +69,7 @@ pub struct PlayerBundle {
     light_inventory: PlayerLightInventory,
 }
 
+/// [`Bundle`] registered with Ldtk that will be spawned in with the level.
 #[derive(Default, Bundle, LdtkEntity)]
 pub struct LdtkPlayerBundle {
     player_marker: PlayerMarker,
@@ -78,6 +83,7 @@ pub struct LdtkPlayerBundle {
     instance: EntityInstance,
 }
 
+/// [`System`] that will send a [`KillPlayerEvent`] when the "R" key is pressed.
 fn quick_reset(mut ev_kill_player: EventWriter<KillPlayerEvent>) {
     ev_kill_player.send(KillPlayerEvent);
 }
