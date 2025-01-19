@@ -28,7 +28,7 @@ jobs:
       run: cp src/level/setup_example.rs src/level/setup.rs
 
     - name: Build Documentation
-      run: cargo doc --all --no-deps
+      run: cargo doc --all -p lightborne -p bevy -p bevy_ecs_ldtk -p bevy_rapier2d
 
     - name: Deploy Docs
       uses: peaceiris/actions-gh-pages@v4
