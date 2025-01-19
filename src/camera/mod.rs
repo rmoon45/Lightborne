@@ -3,6 +3,9 @@ use bevy::{
     prelude::*,
     render::camera::ScalingMode,
 };
+use bevy_rapier2d::plugin::PhysicsSet;
+
+use crate::{level::CurrentLevel, player::PlayerMarker};
 
 /// The [`Plugin`] responsible for handling anything Camera related.
 pub struct CameraPlugin;
@@ -11,7 +14,7 @@ impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<MoveCameraEvent>()
             .add_systems(Startup, setup_camera)
-            .add_systems(Update, move_camera);
+            .add_systems(PostUpdate, move_camera.after(PhysicsSet::Writeback)); // update after physics writeback to prevent jittering
     }
 }
 
@@ -38,6 +41,9 @@ pub struct MainCamera;
 #[derive(Event)]
 pub struct MoveCameraEvent(pub Vec2);
 
+const CAMERA_WIDTH: f32 = 320.;
+const CAMERA_HEIGHT: f32 = 180.;
+
 /// [`Startup`] [`System`] that spawns the [`Camera2d`] in the world.
 ///
 /// Notes:
@@ -55,29 +61,35 @@ fn setup_camera(mut commands: Commands) {
         .insert(Bloom::default())
         .insert(Projection::Orthographic(OrthographicProjection {
             scaling_mode: ScalingMode::Fixed {
-                width: 320.,
-                height: 180.,
+                width: CAMERA_WIDTH,
+                height: CAMERA_HEIGHT,
             },
             ..OrthographicProjection::default_2d()
         }))
         .insert(Transform::from_xyz(160., -94., 0.));
 }
 
-/// [`System`] that responds to [`MoveCameraEvent`] events. Will assign the value of the latest event
-/// read this frame to the [`MainCamera`]'s [`Transform`].
+/// [`System`] that moves camera to player's position and constrains it to the [`CurrentLevel`]'s `world_box`.
 pub fn move_camera(
-    mut q_camera: Query<&mut Transform, With<MainCamera>>,
-    mut ev_move_camera: EventReader<MoveCameraEvent>,
+    current_level: Res<CurrentLevel>,
+    q_player: Query<&Transform, With<PlayerMarker>>,
+    mut q_camera: Query<&mut Transform, (With<MainCamera>, Without<PlayerMarker>)>,
 ) {
-    let Ok(mut transform) = q_camera.get_single_mut() else {
+    let Ok(mut camera_transform) = q_camera.get_single_mut() else {
         return;
     };
-    if ev_move_camera.is_empty() {
+    let Ok(player_transform) = q_player.get_single() else {
         return;
-    }
-    let mut next_pos = transform.translation.truncate();
-    for event in ev_move_camera.read() {
-        next_pos = event.0;
-    }
-    transform.translation = next_pos.extend(0.0);
+    };
+    let (x_min, x_max) = (
+        current_level.world_box.min.x + CAMERA_WIDTH * 0.5,
+        current_level.world_box.max.x - CAMERA_WIDTH * 0.5,
+    );
+    camera_transform.translation.x = player_transform.translation.x.max(x_min).min(x_max);
+
+    let (y_min, y_max) = (
+        current_level.world_box.min.y + CAMERA_HEIGHT * 0.5,
+        current_level.world_box.max.y - CAMERA_HEIGHT * 0.5,
+    );
+    camera_transform.translation.y = player_transform.translation.y.max(y_min).min(y_max);
 }
