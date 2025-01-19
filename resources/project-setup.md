@@ -121,9 +121,9 @@ Once you have installed and cloned the repository, all that is left to do is run
 
 We want every one of you to be able to make and test changes to the level without causing tons of merge conflicts!
 
-- Copy the `lightborne.ldtk` file from `assets/lightborne.ldtk` to `assets/levels/<firstname>-<lastname>.ldtk`
+- Copy the `lightborne.ldtk` file from `assets/levels/lightborne.ldtk` to `assets/levels/<firstname>-<lastname>.ldtk`
     - See my example already in the folder!
-- Copy `src/level/setup_example.rs` to `src/level/setup.rs`. you will also need to make two changes in the file:
+- Copy `src/level/setup_example.rs` to `src/level/setup.rs`. You will also need to make two changes in the file:
     ```rust
     impl Plugin for LevelSetupPlugin {
         fn build(&self, app: &mut App) {
@@ -138,7 +138,7 @@ We want every one of you to be able to make and test changes to the level withou
     ```rust
     fn setup_level(mut commands: Commands, asset_server: Res<AssetServer>) {
         commands.spawn(LdtkWorldBundle {
-            ldtk_handle: asset_server.load("lightborne.ldtk").into(),
+            ldtk_handle: asset_server.load("levels/lightborne.ldtk").into(),
             // CHANGEME:                           ^
             // Change this to the name of your own level file (likely
             // levels/<firstname>-<lastname>.ldtk)
@@ -147,7 +147,10 @@ We want every one of you to be able to make and test changes to the level withou
     }
     ```
 - Once you have done these things, then you can make edits to your own LDTK file. Try and paint some new tiles, **save**, and run again with `cargo r`.
-- **IMPORTANT**: I have added the `src/level/setup.rs` file to `.gitignore`. This means that you should not include this file when you make a commit! This will prevent us from getting merge conflicts in this file.
+
+### Notes
+
+- I have added the `src/level/setup.rs` file to `.gitignore`. This means that you should not include this file when you make a commit! This will prevent us from getting merge conflicts in this file.
 
 ## Contributing
 

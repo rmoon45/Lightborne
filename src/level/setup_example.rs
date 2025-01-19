@@ -15,7 +15,7 @@ impl Plugin for LevelSetupPlugin {
 
 fn setup_level(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(LdtkWorldBundle {
-        ldtk_handle: asset_server.load("lightborne.ldtk").into(),
+        ldtk_handle: asset_server.load("levels/lightborne.ldtk").into(),
         // CHANGEME:                           ^
         // Change this to the name of your own level file (likely
         // levels/<firstname>-<lastname>.ldtk)

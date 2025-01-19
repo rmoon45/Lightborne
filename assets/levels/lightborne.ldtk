@@ -1338,7 +1338,7 @@
 			"__cHei": 5,
 			"identifier": "Lightborne_tileset",
 			"uid": 111,
-			"relPath": "lightborne tileset.png",
+			"relPath": "../lightborne-tileset.png",
 			"embedAtlas": null,
 			"pxWid": 48,
 			"pxHei": 40,
@@ -1353,50 +1353,6 @@
 			"cachedPixelData": {
 				"opaqueTiles": "110101001111111111111111111010",
 				"averageColors": "f48cf235e235f235e335f235e235e335f235f224f335f235f335f224f224f224f224f335f335f235f335f113f235f335f224f235f6a679c9fb687e9b"
-			}
-		},
-		{
-			"__cWid": 12,
-			"__cHei": 32,
-			"identifier": "Cavernas_tile_set",
-			"uid": 9,
-			"relPath": "cavernas-tile-set.png",
-			"embedAtlas": null,
-			"pxWid": 96,
-			"pxHei": 256,
-			"tileGridSize": 8,
-			"spacing": 0,
-			"padding": 0,
-			"tags": [],
-			"tagsSourceEnumUid": null,
-			"enumTags": [],
-			"customData": [],
-			"savedSelections": [
-				{ "ids": [0,1,2,3,4,5,6], "mode": "Random" },
-				{ "ids": [120,121,122], "mode": "Random" },
-				{ "ids": [56,57,58,59], "mode": "Random" },
-				{ "ids": [32,44,33,45,34,46,35,47], "mode": "Random" },
-				{ "ids": [9,10], "mode": "Random" },
-				{ "ids": [20,21,22], "mode": "Random" },
-				{ "ids": [25,40], "mode": "Random" },
-				{ "ids": [168,180], "mode": "Stamp" },
-				{ "ids": [169,181], "mode": "Stamp" },
-				{ "ids": [170,182], "mode": "Stamp" },
-				{ "ids": [156,157,158], "mode": "Random" },
-				{ "ids": [140,141], "mode": "Random" },
-				{ "ids": [142,143], "mode": "Random" },
-				{ "ids": [154,155], "mode": "Random" },
-				{ "ids": [152,153], "mode": "Random" },
-				{ "ids": [164,165], "mode": "Random" },
-				{ "ids": [265,277,289], "mode": "Random" },
-				{ "ids": [266,278,290], "mode": "Random" },
-				{ "ids": [268,280,292], "mode": "Random" },
-				{ "ids": [269,281,293], "mode": "Random" },
-				{ "ids": [252,264,276,288], "mode": "Random" }
-			],
-			"cachedPixelData": {
-				"opaqueTiles": "111111111111111111111110111111110000111111110000111111110000111111110000111111110000111111111001111111111100111111111100111111111100111111111111000111111111111001111100111000000000111000000000111000000000111000000000111100000000010011000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-				"averageColors": "f123f224f224f224f224f224f224f224f333f324f323f434f573f453f343f666f666f334f544f544f334f334f3340000f343f223f233f334f445f555f644f2344336323563464346f343f233f233f334f223f778f223f5337335523553366346f224f666f667f974f654f654f533f5332564256435642454f334f236f445f644f544f634f434f3344235000000000000f235f236f334f644f433f223f764f6660000000000000000f447f233f224f223fa54f224f335f446f75400000000f011f236f34af236f623fe41f555f999f888f644f5443000b011f888f78bf888f679fea8fdccfaaaf556f434f12330003111f66af67bf67bf349fe97f453f343f334f654f54410000000f226f224f338f236f423f224f224f224f623f623f267f267711271237112f333f343f224f224f123f852f852f326f325f112f112f11200000000f224f224f224f777f77700000000f744f459f112000000000000000000000000000000000000f743f338f111000000000000000000000000000000000000f223f223f223000000000000000000000000000000000000f223f223f123000000000000000000000000000000000000f223f223f123f22400000000000000000000000000000000b353f233c353b235f123f2350000000000000000000000005353e343e3535335f235f2350000000000000000000000007353786446440000823552350000000000000000000000004353897448640000823542350000000000000000000000005353897447640000823542350000000000000000000000005353897448640000823542350000000000000000000000000000aa7567540000b2356235000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 			}
 		},
 		{
@@ -1426,7 +1382,7 @@
 			"__cHei": 4,
 			"identifier": "Lyra",
 			"uid": 107,
-			"relPath": "lyra.png",
+			"relPath": "../lyra.png",
 			"embedAtlas": null,
 			"pxWid": 16,
 			"pxHei": 32,
@@ -1438,7 +1394,7 @@
 			"enumTags": [],
 			"customData": [],
 			"savedSelections": [],
-			"cachedPixelData": { "opaqueTiles": "00000000", "averageColors": "16581658eccddbbcdaabbaba36a82654" }
+			"cachedPixelData": { "opaqueTiles": "00000000", "averageColors": "16581658eccdebabdaabcaba36a82654" }
 		}
 	], "enums": [{ "identifier": "LightColor", "uid": 159, "values": [
 		{ "id": "Red", "tileRect": { "tilesetUid": 111, "x": 32, "y": 32, "w": 8, "h": 8 }, "color": 16711748 },
@@ -1827,7 +1783,7 @@
 					"__pxTotalOffsetX": 0,
 					"__pxTotalOffsetY": 0,
 					"__tilesetDefUid": 111,
-					"__tilesetRelPath": "lightborne tileset.png",
+					"__tilesetRelPath": "../lightborne-tileset.png",
 					"iid": "a2b563a3-66b0-11ec-9cd7-3b4d61ca1d4f",
 					"levelId": 70,
 					"layerDefUid": 10,
@@ -2619,7 +2575,7 @@
 					"__pxTotalOffsetX": 0,
 					"__pxTotalOffsetY": 0,
 					"__tilesetDefUid": 111,
-					"__tilesetRelPath": "lightborne tileset.png",
+					"__tilesetRelPath": "../lightborne-tileset.png",
 					"iid": "bbc5a582-c210-11ef-833b-cbead57a702c",
 					"levelId": 187,
 					"layerDefUid": 10,
@@ -3788,7 +3744,7 @@
 					"__pxTotalOffsetX": 0,
 					"__pxTotalOffsetY": 0,
 					"__tilesetDefUid": 111,
-					"__tilesetRelPath": "lightborne tileset.png",
+					"__tilesetRelPath": "../lightborne-tileset.png",
 					"iid": "4bcf6c00-c210-11ef-833b-83c113b7f1ce",
 					"levelId": 188,
 					"layerDefUid": 10,
@@ -4570,7 +4526,7 @@
 					"__pxTotalOffsetX": 0,
 					"__pxTotalOffsetY": 0,
 					"__tilesetDefUid": 111,
-					"__tilesetRelPath": "lightborne tileset.png",
+					"__tilesetRelPath": "../lightborne-tileset.png",
 					"iid": "14c704f2-c210-11ef-833b-b381b934ed14",
 					"levelId": 190,
 					"layerDefUid": 10,
