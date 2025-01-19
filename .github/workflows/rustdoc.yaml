@@ -24,9 +24,6 @@ jobs:
     - name: Install Rust toolchain
       run: rustup update --no-self-update stable
 
-    - name: Copy Level Setup
-      run: cp src/level/setup_example.rs src/level/setup.rs
-
     - name: Build Documentation
       run: cargo doc --all --no-deps
 

@@ -123,10 +123,10 @@ We want every one of you to be able to make and test changes to the level withou
 
 - Copy the `lightborne.ldtk` file from `assets/levels/lightborne.ldtk` to `assets/levels/<firstname>-<lastname>.ldtk`
     - See my example already in the folder!
-- In `Lightborne.toml`, inside the `[level_config]` table:
+- Copy `Lightborne_example.toml` to `Lightborne.toml`. In `Lightborne.toml`, inside the `[level_config]` table:
     - change `level_index` to the level you want the game to start in
     - change `level_path` to the path to the `.ldtk` file you just created
-    - (As an aside: you are free to modify Lightborne.toml, but the changes to this file will never be included in your commit. Look into `git update-index --skip-worktree` if you're interested in how this works.)
+    - (As an aside: you are free to modify Lightborne.toml, but the changes to this file shouldn't be included in your commit because it is in `.gitignore`).
 - Once you have done these things, then you can make edits to your own LDTK file. Try and paint some new tiles, **save**, and run again with `cargo r`.
 
 ## Contributing
