@@ -56,7 +56,7 @@ pub struct GroupTriggeredEvent {
     pub id: i32,
 }
 
-/// The [`Update`] [`System`] responsible for responding to [`GroupTriggeredEvents`], and inserting
+/// The [`Update`] [`System`] responsible for responding to [`GroupTriggeredEvent`]s, and inserting
 /// [`Activated`] markers.
 pub fn update_activatables(
     mut commands: Commands,

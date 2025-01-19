@@ -80,7 +80,7 @@ impl LightColor {
 
 /// A [`Component`] marking the start of a light ray. These are spawned in
 /// [`shoot_light`](crate::player::light::shoot_light), and simulated in
-/// [`simulate_light_sources`](segments::simulate_light_sources).
+/// [`simulate_light_sources`]
 #[derive(Component)]
 pub struct LightRaySource {
     pub start_pos: Vec2,
