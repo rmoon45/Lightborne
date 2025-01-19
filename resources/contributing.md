@@ -1,34 +1,5 @@
 # Contributing
 
-## Making changes to the level
-
-- If you are a level designer or programmer making changes to the level, you need to **make a copy** of the level file. Copy the `lightborne.ldtk` file from `assets/lightborne.ldtk` to `assets/levels/<firstname>-<lastname>.ldtk`. This way, each one of you can make and test changes to the level without causing tons of merge conflicts. See my example already in the folder!
-- In `src/level/setup.rs`, you will need to make two changes (search for 'CHANGEME'):
-    ```rust
-    impl Plugin for LevelSetupPlugin {
-        fn build(&self, app: &mut App) {
-            app.insert_resource(LevelSelection::index(3))
-                // CHANGEME:                          ^
-                // Change this if you want to start in a different level. Note that the "Lyra" entity
-                // should be present in this level.
-                .add_systems(Startup, setup_level);
-        }
-    }
-    ```
-    ```rust
-    fn setup_level(mut commands: Commands, asset_server: Res<AssetServer>) {
-        commands.spawn(LdtkWorldBundle {
-            ldtk_handle: asset_server.load("lightborne.ldtk").into(),
-            // CHANGEME:                           ^
-            // Change this to the name of your own level file (likely
-            // levels/<firstname>-<lastname>.ldtk)
-            ..Default::default()
-        });
-    }
-    ```
-- Once you have done these things, then you can make edits to your own LDTK file. Try and paint some new tiles, **save**, and run again with `cargo r`.
-- **IMPORTANT**: I have added the `src/level/setup.rs` file to `.gitignore`. This means that you should not include this file when you make a commit! This will prevent us from getting merge conflicts in this file.
-
 ## Commit messages and Branch names
 
 - Try to use your best judgement for these: there are no rules!

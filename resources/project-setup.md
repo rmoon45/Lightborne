@@ -10,8 +10,9 @@ Hi! If you're here, that means you want to start working on Lightborne. This gui
     5. [Ldtk (Optional)](#ldtk-optional)
 2. Setup
     1. [Repository](#repository)
-    2. [Project](#project)
-    3. [Contributing](#contributing)
+    2. [Project](#run-the-project)
+    3. [Changing the Level](#changing-the-level)
+    4. [Contributing](#contributing)
 3. [Conclusion](#conclusion)
 
 ## Code Editor
@@ -103,17 +104,50 @@ Once you launch the application, it should look something like this:
 - If you'd rather have your folder structure like `Foo/<project files>` then run `git clone <url you just copied> .` (note the period).
 - Here is a [nice tutorial with GUI instructions](https://docs.google.com/document/d/1_OLH8WOER0-sgenzXkye7k3H6un_LsuDimNk283oSnU/edit?usp=sharing) on the basics of Git.
 
-## Project
+## Run the Project
 
 Once you have installed and cloned the repository, all that is left to do is run Lightborne!
 
 1. In a terminal, navigate to where you cloned your repository. Double check that there is a file called `Cargo.toml` in this directory.
 2. Type `cargo r` (short for `cargo run`). This will compile and run the project!
 
+
 ### Notes
 
 - This will probably take a while (only for the first time!).
 - If you're interested, you can research [some ways to optimize for compile time](https://bevyengine.org/learn/quick-start/getting-started/setup/#enable-fast-compiles-optional). We have already enabled dynamic linking for the project, but feel free to try anything else.
+
+## Changing the Level
+
+We want every one of you to be able to make and test changes to the level without causing tons of merge conflicts!
+
+- Copy the `lightborne.ldtk` file from `assets/lightborne.ldtk` to `assets/levels/<firstname>-<lastname>.ldtk`
+    - See my example already in the folder!
+- Copy `src/level/setup_example.rs` to `src/level/setup.rs`. you will also need to make two changes in the file:
+    ```rust
+    impl Plugin for LevelSetupPlugin {
+        fn build(&self, app: &mut App) {
+            app.insert_resource(LevelSelection::index(3))
+                // CHANGEME:                          ^
+                // Change this if you want to start in a different level. Note that the "Lyra" entity
+                // should be present in this level.
+                .add_systems(Startup, setup_level);
+        }
+    }
+    ```
+    ```rust
+    fn setup_level(mut commands: Commands, asset_server: Res<AssetServer>) {
+        commands.spawn(LdtkWorldBundle {
+            ldtk_handle: asset_server.load("lightborne.ldtk").into(),
+            // CHANGEME:                           ^
+            // Change this to the name of your own level file (likely
+            // levels/<firstname>-<lastname>.ldtk)
+            ..Default::default()
+        });
+    }
+    ```
+- Once you have done these things, then you can make edits to your own LDTK file. Try and paint some new tiles, **save**, and run again with `cargo r`.
+- **IMPORTANT**: I have added the `src/level/setup.rs` file to `.gitignore`. This means that you should not include this file when you make a commit! This will prevent us from getting merge conflicts in this file.
 
 ## Contributing
 
