@@ -2,6 +2,10 @@
 
 Cargo.lock
 
+src/level/setup.rs
+
+**/.DS_Store
+
 **/ldtk.AppImage
 
 .idea

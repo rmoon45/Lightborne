@@ -8,6 +8,7 @@ use crate::{
 use activatable::ActivatablePlugin;
 use crystal::CrystalPlugin;
 use misc::{init_start_marker, ButtonBundle, StartFlagBundle};
+use setup::LevelSetupPlugin;
 use walls::{spawn_wall_collision, WallBundle};
 
 pub mod activatable;
@@ -15,6 +16,7 @@ mod crystal;
 mod entity;
 pub mod interactable;
 pub mod misc;
+mod setup;
 mod walls;
 
 pub struct LevelManagementPlugin;
@@ -22,11 +24,11 @@ pub struct LevelManagementPlugin;
 impl Plugin for LevelManagementPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(LdtkPlugin)
+            .add_plugins(LevelSetupPlugin)
             .add_plugins(ActivatablePlugin)
             .add_plugins(CrystalPlugin)
             .add_event::<LevelSwitchEvent>()
             .init_resource::<CurrentLevel>()
-            .insert_resource(LevelSelection::index(3))
             .insert_resource(LdtkSettings {
                 level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation {
                     load_level_neighbors: true,
@@ -37,7 +39,6 @@ impl Plugin for LevelManagementPlugin {
             .register_ldtk_entity::<ButtonBundle>("Button")
             .register_ldtk_entity::<StartFlagBundle>("Start")
             .register_ldtk_int_cell::<WallBundle>(1)
-            .add_systems(Startup, setup_level)
             .add_systems(Update, spawn_wall_collision)
             .add_systems(Update, init_start_marker)
             .add_systems(Update, switch_level);
@@ -49,13 +50,6 @@ pub struct CurrentLevel(pub String);
 
 #[derive(Event)]
 pub struct LevelSwitchEvent;
-
-fn setup_level(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(LdtkWorldBundle {
-        ldtk_handle: asset_server.load("lightborne.ldtk").into(),
-        ..Default::default()
-    });
-}
 
 fn switch_level(
     q_player: Query<(&Transform, &EntityInstance), With<PlayerMarker>>,

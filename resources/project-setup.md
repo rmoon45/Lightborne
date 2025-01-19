@@ -11,6 +11,7 @@ Hi! If you're here, that means you want to start working on Lightborne. This gui
 2. Setup
     1. [Repository](#repository)
     2. [Project](#project)
+    3. [Contributing](#contributing)
 3. [Conclusion](#conclusion)
 
 ## Code Editor
@@ -113,6 +114,10 @@ Once you have installed and cloned the repository, all that is left to do is run
 
 - This will probably take a while (only for the first time!).
 - If you're interested, you can research [some ways to optimize for compile time](https://bevyengine.org/learn/quick-start/getting-started/setup/#enable-fast-compiles-optional). We have already enabled dynamic linking for the project, but feel free to try anything else.
+
+## Contributing
+
+### Please read through [contributing.md](/resources/contributing.md).
 
 ## Conclusion
 
