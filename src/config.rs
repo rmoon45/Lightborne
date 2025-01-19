@@ -5,11 +5,16 @@ pub struct ConfigPlugin;
 
 impl Plugin for ConfigPlugin {
     fn build(&self, app: &mut App) {
+        let config_path = if let Ok(true) = std::fs::exists("Lightborne.toml") {
+            "Lightborne.toml"
+        } else {
+            "Lightborne_example.toml"
+        };
         let config: Config = toml::from_str(
-            &std::fs::read_to_string("Lightborne.toml")
-                .expect("Failed to read Lightborne.toml. Is it in the right place?"),
+            &std::fs::read_to_string(config_path)
+                .expect(&format!("Failed to find {config_path}. Is it in the right place?")),
         )
-        .expect("Failed to parse Lightborne.toml. Is it formatted correctly?");
+        .expect(&format!("Failed to parse {config_path}. Is it formatted correctly?"));
         app.insert_resource(config);
     }
 }

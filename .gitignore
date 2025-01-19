@@ -2,6 +2,8 @@
 
 Cargo.lock
 
+Lightborne.toml
+
 **/.DS_Store
 
 **/ldtk.AppImage
