@@ -12,8 +12,7 @@ pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<MoveCameraEvent>()
-            .add_systems(Startup, setup_camera)
+        app.add_systems(Startup, setup_camera)
             .add_systems(PostUpdate, move_camera.after(PhysicsSet::Writeback)); // update after physics writeback to prevent jittering
     }
 }
@@ -26,20 +25,6 @@ impl Plugin for CameraPlugin {
 /// ```
 #[derive(Component, Default)]
 pub struct MainCamera;
-
-/// [`Event`] struct used to request the camera move to a certain position, from another part of the
-/// code.
-///
-/// Example usage:
-/// ```rust
-/// fn my_system(
-///     mut ev_move_camera: EventWriter<MoveCameraEvent>,
-/// ) {
-///     ev_move_camera.send(MoveCameraEvent(Vec2::ZERO)); // will move the camera to 0, 0
-/// }
-/// ```
-#[derive(Event)]
-pub struct MoveCameraEvent(pub Vec2);
 
 const CAMERA_WIDTH: f32 = 320.;
 const CAMERA_HEIGHT: f32 = 180.;

@@ -1,10 +1,7 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
-use crate::{
-    camera::MoveCameraEvent,
-    player::{LdtkPlayerBundle, PlayerMarker},
-};
+use crate::player::{LdtkPlayerBundle, PlayerMarker};
 use activatable::ActivatablePlugin;
 use crystal::CrystalPlugin;
 use misc::{init_start_marker, ButtonBundle, StartFlagBundle};
@@ -66,7 +63,6 @@ fn switch_level(
     mut level_selection: ResMut<LevelSelection>,
     ldtk_projects: Query<&LdtkProjectHandle>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
-    mut ev_move_camera: EventWriter<MoveCameraEvent>,
     mut ev_level_switch: EventWriter<LevelSwitchEvent>,
     mut current_level: ResMut<CurrentLevel>,
 ) {
@@ -99,7 +95,6 @@ fn switch_level(
         if world_box.contains(player_box.center()) {
             // ev_move_camera.send(MoveCameraEvent(world_box.center()));
             if current_level.level_iid != level_iid.as_str() {
-                ev_move_camera.send(MoveCameraEvent(world_box.center()));
                 ev_level_switch.send(LevelSwitchEvent);
                 *current_level = CurrentLevel {
                     level_iid: level_iid.to_string(),
