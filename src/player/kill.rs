@@ -31,7 +31,7 @@ pub fn reset_player_position(
     ev_level_switch.send(LevelSwitchEvent);
 
     for (flag, instance) in q_start_flag.iter() {
-        if current_level.0 == flag.level_iid {
+        if current_level.level_iid == flag.level_iid {
             transform.translation.x =
                 instance.world_x.expect("Lightborne uses Free world layout") as f32;
             transform.translation.y =

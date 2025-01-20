@@ -48,7 +48,10 @@ impl Plugin for LevelManagementPlugin {
 
 /// [`Resource`] that holds the `level_iid` of the current level.
 #[derive(Default, Resource)]
-pub struct CurrentLevel(pub String);
+pub struct CurrentLevel {
+    pub level_iid: String,
+    pub world_box: Rect,
+}
 
 /// [`Event`] that will be sent to inform other systems that the level is switching and should be
 /// reinitialized.
@@ -95,10 +98,13 @@ fn switch_level(
 
         if world_box.contains(player_box.center()) {
             // ev_move_camera.send(MoveCameraEvent(world_box.center()));
-            if current_level.0 != level_iid.as_str() {
+            if current_level.level_iid != level_iid.as_str() {
                 ev_move_camera.send(MoveCameraEvent(world_box.center()));
                 ev_level_switch.send(LevelSwitchEvent);
-                current_level.0 = level_iid.to_string();
+                *current_level = CurrentLevel {
+                    level_iid: level_iid.to_string(),
+                    world_box,
+                };
                 *level_selection = LevelSelection::iid(level_iid.to_string());
             }
             break;
