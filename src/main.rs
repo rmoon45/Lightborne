@@ -45,7 +45,7 @@ fn main() {
         .add_plugins(ConfigPlugin)
         .add_plugins(LogDiagnosticsPlugin::default())
         .add_plugins(FrameTimeDiagnosticsPlugin)
-        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(8.0))
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(8.0).in_fixed_schedule())
         // .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(PlayerManagementPlugin)
         .add_plugins(LevelManagementPlugin)

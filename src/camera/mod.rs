@@ -13,7 +13,8 @@ pub struct CameraPlugin;
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup_camera)
-            .add_systems(PostUpdate, move_camera.after(PhysicsSet::Writeback)); // update after physics writeback to prevent jittering
+            .add_systems(FixedUpdate, move_camera.after(PhysicsSet::Writeback));
+        // update after physics writeback to prevent jittering
     }
 }
 

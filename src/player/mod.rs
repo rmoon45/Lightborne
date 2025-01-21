@@ -24,7 +24,7 @@ impl Plugin for PlayerManagementPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<KillPlayerEvent>()
             .add_systems(Update, add_player_sensors) // ran when LDTK spawns the player
-            .add_systems(FixedUpdate, move_player)
+            .add_systems(FixedUpdate, move_player.before(PhysicsSet::SyncBackend))
             .add_systems(
                 Update,
                 queue_jump
