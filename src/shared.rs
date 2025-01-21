@@ -1,5 +1,6 @@
 use bevy_rapier2d::prelude::*;
 
+/// Labels used for rapier_2d [`CollisionGroups`]
 pub struct GroupLabel;
 
 impl GroupLabel {

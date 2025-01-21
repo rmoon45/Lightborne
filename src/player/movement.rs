@@ -3,16 +3,25 @@ use bevy_rapier2d::prelude::*;
 
 use super::PlayerMarker;
 
+/// The number of [`FixedUpdate`] steps the player can jump for after pressing the spacebar.
 const SHOULD_JUMP_TICKS: isize = 8;
+/// The number of [`FixedUpdate`] steps the player can jump for after falling off an edge.
 const COYOTE_TIME_TICKS: isize = 5;
+/// The number of [`FixedUpdate`] steps the player should receive upward velocity for.
 const JUMP_BOOST_TICKS: isize = 2;
 
+/// Max player horizontal velocity.
 const PLAYER_MAX_H_VEL: f32 = 1.5;
+/// Max player vertical velocity.
 const PLAYER_MAX_Y_VEL: f32 = 5.;
+/// The positive y velocity added to the player every jump boost tick.
 const PLAYER_JUMP_VEL: f32 = 2.2;
+/// The x velocity added to the player when A/D is held.
 const PLAYER_MOVE_VEL: f32 = 0.6;
+/// The y velocity subtracted from the player due to gravity.
 const PLAYER_GRAVITY: f32 = 0.15;
 
+/// [`Component`] that stores information about the player's movement state.
 #[derive(Component, Default)]
 pub struct PlayerMovement {
     /// Holds information that is passed into the rapier character controller's translation
@@ -22,6 +31,8 @@ pub struct PlayerMovement {
     jump_boost_ticks_remaining: isize,
 }
 
+/// [`System`] that is run the frame the space bar is pressed. Allows the player to jump for the
+/// next couple of frames.
 pub fn queue_jump(mut q_player: Query<&mut PlayerMovement, With<PlayerMarker>>) {
     let Ok(mut player) = q_player.get_single_mut() else {
         return;
@@ -29,6 +40,7 @@ pub fn queue_jump(mut q_player: Query<&mut PlayerMovement, With<PlayerMarker>>) 
     player.should_jump_ticks_remaining = SHOULD_JUMP_TICKS;
 }
 
+/// [`System`] that is run on [`Update`] to move the player around.
 pub fn move_player(
     mut q_player: Query<
         (
@@ -56,7 +68,7 @@ pub fn move_player(
         // Jump was cut
         player.velocity.y = PLAYER_GRAVITY;
         player.jump_boost_ticks_remaining = 0;
-    } else if output.desired_translation.y - output.effective_translation.y > 0.05 {
+    } else if output.desired_translation.y > 0. && output.effective_translation.y < 0.05 {
         // Bonked head onto wall
         player.velocity.y = 0.;
         player.jump_boost_ticks_remaining = 0;

@@ -6,15 +6,17 @@ use bevy_rapier2d::prelude::*;
 
 use crate::shared::GroupLabel;
 
+/// Marker [`Component`] representing a wall.
 #[derive(Default, Component)]
 pub struct Wall;
 
+/// Wall [`Bundle`] spawned int by Ldtk.
 #[derive(Default, Bundle, LdtkIntCell)]
 pub struct WallBundle {
     wall: Wall,
 }
 
-/// NOTE: copied from https://github.com/Trouv/bevy_ecs_ldtk/blob/main/examples/platformer/walls.rs
+/// NOTE: copied from the [`bevy_ecs_ldtk` examples](https://github.com/Trouv/bevy_ecs_ldtk/blob/main/examples/platformer/walls.rs)
 ///
 /// Spawns heron collisions for the walls of a level
 ///

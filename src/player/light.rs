@@ -10,12 +10,15 @@ use crate::{
 
 use super::PlayerMarker;
 
+/// A [`Component`] used to track Lyra's current shooting color as well as the number of beams of
+/// that color remaining.
 #[derive(Component, Default)]
 pub struct PlayerLightInventory {
     current_color: LightColor,
     sources: EnumMap<LightColor, Option<Entity>>,
 }
 
+/// [`System`] to handle the keyboard presses corresponding to color switches.
 pub fn handle_color_switch(
     keys: Res<ButtonInput<KeyCode>>,
     mut q_inventory: Query<&mut PlayerLightInventory>,
@@ -34,6 +37,9 @@ pub fn handle_color_switch(
     }
 }
 
+/// [`System`] that spawns a [`LightRaySource`] when the player releases the left mouse button.
+/// This system should instead consider sending a `LightRaySpawnEvent` with the needed information
+/// to keep all light-related systems in the [`light`](crate::light) module.
 pub fn shoot_light(
     mut commands: Commands,
     mut q_player: Query<(&Transform, &mut PlayerLightInventory), With<PlayerMarker>>,
@@ -71,13 +77,19 @@ pub fn shoot_light(
     player_inventory.sources[player_inventory.current_color] = Some(id);
 }
 
-// FIXME: duplicate code with some of light module, should be made common function
+/// [`System`] that uses [`Gizmos`] to preview the light path while the left mouse button is held
+/// down. This system needs some work, namely:
+///
+/// - Not using [`Gizmos`] to render the light segments
+/// - Not copying the same code logic as
+///    [`simulate_light_sources`](crate::light::segments::simulate_light_sources).
 pub fn preview_light_path(
     mut q_rapier: Query<&mut RapierContext>,
     q_player: Query<(&Transform, &PlayerLightInventory), With<PlayerMarker>>,
     q_cursor: Query<&CursorWorldCoords>,
     mut gizmos: Gizmos,
 ) {
+    // FIXME: duplicate code with some of light module, should be made common function
     let Ok(rapier_context) = q_rapier.get_single_mut() else {
         return;
     };

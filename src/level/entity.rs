@@ -4,6 +4,8 @@ use bevy_rapier2d::prelude::*;
 
 use crate::shared::GroupLabel;
 
+/// [`Bundle`] used to group together components commonly used together when initializing physics
+/// for fixed [`LdtkEntity`]s.
 #[derive(Default, Bundle)]
 pub struct FixedEntityBundle {
     collider: Collider,
@@ -12,6 +14,9 @@ pub struct FixedEntityBundle {
 }
 
 impl From<&EntityInstance> for FixedEntityBundle {
+    /// This function will instantiate the proper values for a [`FixedEntityBundle`] depending on
+    /// the [`LdtkEntity`]'s name in Ldtk. If you add a new entity in the Ldtk file that should be
+    /// spawned with the [`FixedEntityBundle`], then you'll need to make changes here as well.
     fn from(entity_instance: &EntityInstance) -> Self {
         // NOTE: the size of the collider should match the visual of the entity in the level editor
         match entity_instance.identifier.as_ref() {

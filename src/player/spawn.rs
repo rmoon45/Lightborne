@@ -6,6 +6,7 @@ use crate::shared::GroupLabel;
 
 use super::{light::PlayerLightInventory, movement::PlayerMovement, PlayerBundle, PlayerMarker};
 
+/// Used by Ldtk to spawn the player correctly with all of the correct [`Component`]s.
 pub fn init_player_bundle(_: &EntityInstance) -> PlayerBundle {
     PlayerBundle {
         body: RigidBody::KinematicPositionBased,
@@ -29,6 +30,7 @@ pub fn init_player_bundle(_: &EntityInstance) -> PlayerBundle {
     }
 }
 
+/// [`System`] that spawns the player's hurtbox [`Collider`] as a child entity.
 pub fn add_player_sensors(mut commands: Commands, q_player: Query<Entity, Added<PlayerMarker>>) {
     let Ok(player) = q_player.get_single() else {
         return;

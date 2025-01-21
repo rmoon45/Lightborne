@@ -7,6 +7,9 @@ use super::{
     LevelSwitchEvent,
 };
 
+/// [`Plugin`] for managing all things related to [`Crystal`]s. This plugin responds to the
+/// addition and removal of [`Activated`] [`Component`]s and updates the sprite and collider of
+/// each crystal entity, in addition to handling initialization and cleanup on a [`LevelSwitchEvent`].
 pub struct CrystalPlugin;
 
 impl Plugin for CrystalPlugin {
@@ -21,9 +24,12 @@ impl Plugin for CrystalPlugin {
     }
 }
 
+/// Marker [`Component`] used to query for crystals, currently does not contain any information.
 #[derive(Default, Component)]
 pub struct Crystal;
 
+/// [`Bundle`] registered with [`LdktEntityAppExt::register_ldtk_entity`](LdtkEntityAppExt) to spawn
+/// crystals directly from Ldtk.
 #[derive(Default, Bundle, LdtkEntity)]
 pub struct CrystalBundle {
     marker: Crystal,
@@ -37,6 +43,8 @@ pub struct CrystalBundle {
     activatable: Activatable,
 }
 
+/// [`System`] to ensure that the sprite color and collider match the initially activated state of
+/// the [`Crystal`].
 pub fn on_crystal_added(
     mut commands: Commands,
     mut q_new: Query<(Entity, &mut Sprite, &Activatable), Added<Crystal>>,
@@ -51,6 +59,8 @@ pub fn on_crystal_added(
     }
 }
 
+/// [`System`] that listens to [`LevelSwitchEvent`]s to ensure that [`Crystal`] states are reset
+/// when switching between rooms.
 pub fn reset_crystals(
     mut commands: Commands,
     mut ev_level_switch: EventReader<LevelSwitchEvent>,
@@ -70,6 +80,12 @@ pub fn reset_crystals(
     }
 }
 
+/// [`System`] that listens to when [`Crystal`]s are activated or deactivated, updating the
+/// [`Sprite`] and adding/removing [`FixedEntityBundle`] of the [`Entity`].
+///
+/// We should instead consider inserting a [`Sensor`](bevy_rapier2d::prelude::Sensor) component and updating the entity's
+/// [`CollisionGroups`](bevy_rapier2d::prelude::CollisionGroups) instead, if we are worried about the entity changing its
+/// Archetype and causing performance issues (not likely, [`Crystal`]s do not change state often).
 pub fn on_crystal_changed(
     mut commands: Commands,
     mut q_activated: Query<Entity, (With<Crystal>, Added<Activated>)>,
