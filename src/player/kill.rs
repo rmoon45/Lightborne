@@ -1,20 +1,18 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
-use crate::level::{misc::StartFlag, CurrentLevel, LevelSwitchEvent};
+use crate::{
+    level::{misc::StartFlag, CurrentLevel},
+    shared::GameState,
+};
 
 use super::{light::PlayerLightInventory, movement::PlayerMovement, PlayerMarker};
 
-/// [`Event`] that is sent when the player should die.
-#[derive(Event)]
-pub struct KillPlayerEvent;
-
-/// [`System`] that listens to [`KillPlayerEvent`]s, and resets the player position. Also sends a
-/// [`LevelSwitchEvent`] to trigger a reinitialization of the room (should this be changed)?.
+/// [`System`] that runs on [`GameState::Respawning`]. Will turn the state back into playing
+/// immediately.
 pub fn reset_player_position(
     mut q_player: Query<&mut Transform, With<PlayerMarker>>,
-    mut ev_kill_events: EventReader<KillPlayerEvent>,
-    mut ev_level_switch: EventWriter<LevelSwitchEvent>,
+    mut next_game_state: ResMut<NextState<GameState>>,
     q_start_flag: Query<(&StartFlag, &EntityInstance)>,
     current_level: Res<CurrentLevel>,
 ) {
@@ -22,13 +20,7 @@ pub fn reset_player_position(
         return;
     };
 
-    if ev_kill_events.is_empty() {
-        return;
-    }
-    ev_kill_events.clear();
-
-    // Trigger level switch to reset the beams and stuff
-    ev_level_switch.send(LevelSwitchEvent);
+    next_game_state.set(GameState::Playing);
 
     for (flag, instance) in q_start_flag.iter() {
         if current_level.level_iid == flag.level_iid {
@@ -46,16 +38,10 @@ pub fn reset_player_position(
 /// Resets the player inventory and movement information on a [`LevelSwitchEvent`]
 pub fn reset_player_on_level_switch(
     mut q_player: Query<(&mut PlayerMovement, &mut PlayerLightInventory), With<PlayerMarker>>,
-    mut ev_level_switch: EventReader<LevelSwitchEvent>,
 ) {
     let Ok((mut movement, mut inventory)) = q_player.get_single_mut() else {
         return;
     };
-
-    if ev_level_switch.is_empty() {
-        return;
-    }
-    ev_level_switch.clear();
 
     *movement = PlayerMovement::default();
     *inventory = PlayerLightInventory::default();

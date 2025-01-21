@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
-use crate::player::{LdtkPlayerBundle, PlayerMarker};
+use crate::{
+    player::{LdtkPlayerBundle, PlayerMarker},
+    shared::GameState,
+};
 use activatable::ActivatablePlugin;
 use crystal::CrystalPlugin;
 use misc::{init_start_marker, ButtonBundle, StartFlagBundle};
@@ -25,7 +28,6 @@ impl Plugin for LevelManagementPlugin {
             .add_plugins(LevelSetupPlugin)
             .add_plugins(ActivatablePlugin)
             .add_plugins(CrystalPlugin)
-            .add_event::<LevelSwitchEvent>()
             .init_resource::<CurrentLevel>()
             .insert_resource(LdtkSettings {
                 level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation {
@@ -50,11 +52,6 @@ pub struct CurrentLevel {
     pub world_box: Rect,
 }
 
-/// [`Event`] that will be sent to inform other systems that the level is switching and should be
-/// reinitialized.
-#[derive(Event)]
-pub struct LevelSwitchEvent;
-
 /// [`System`] that will run on [`Update`] to check if the Player has moved to another level. If
 /// the player has, then a [`LevelSwitchEvent`] will be sent out to notify other systems.
 fn switch_level(
@@ -63,7 +60,7 @@ fn switch_level(
     mut level_selection: ResMut<LevelSelection>,
     ldtk_projects: Query<&LdtkProjectHandle>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
-    mut ev_level_switch: EventWriter<LevelSwitchEvent>,
+    mut next_game_state: ResMut<NextState<GameState>>,
     mut current_level: ResMut<CurrentLevel>,
 ) {
     let Ok((transform, instance)) = q_player.get_single() else {
@@ -95,7 +92,10 @@ fn switch_level(
         if world_box.contains(player_box.center()) {
             // ev_move_camera.send(MoveCameraEvent(world_box.center()));
             if current_level.level_iid != level_iid.as_str() {
-                ev_level_switch.send(LevelSwitchEvent);
+                if !current_level.level_iid.is_empty() {
+                    next_game_state.set(GameState::Switching);
+                }
+
                 *current_level = CurrentLevel {
                     level_iid: level_iid.to_string(),
                     world_box,

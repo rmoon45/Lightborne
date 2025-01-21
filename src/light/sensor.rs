@@ -7,7 +7,6 @@ use crate::{
     level::{
         activatable::GroupTriggeredEvent,
         interactable::{init_interactable, Interactable},
-        LevelSwitchEvent,
     },
     shared::GroupLabel,
 };
@@ -75,15 +74,7 @@ impl From<&EntityInstance> for LightSensorBundle {
 }
 
 /// [`System`] that resets the [`LightSensor`]s when a [`LevelSwitchEvent`] is received.
-pub fn reset_light_sensors(
-    mut q_sensors: Query<&mut LightSensor>,
-    mut ev_level_switch: EventReader<LevelSwitchEvent>,
-) {
-    if ev_level_switch.is_empty() {
-        return;
-    }
-    ev_level_switch.clear();
-
+pub fn reset_light_sensors(mut q_sensors: Query<&mut LightSensor>) {
     for mut sensor in q_sensors.iter_mut() {
         sensor.activation_timer.reset();
         sensor.activation_timer.pause();

@@ -5,9 +5,12 @@ use bevy::{
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::input::update_cursor_world_coords;
+use crate::{
+    input::update_cursor_world_coords,
+    shared::{GameState, GameUpdateSet},
+};
 
-use kill::{reset_player_on_level_switch, reset_player_position, KillPlayerEvent};
+use kill::{reset_player_on_level_switch, reset_player_position};
 use light::{handle_color_switch, preview_light_path, shoot_light, PlayerLightInventory};
 use movement::{move_player, queue_jump, PlayerMovement};
 use spawn::{add_player_sensors, init_player_bundle};
@@ -22,9 +25,13 @@ pub struct PlayerManagementPlugin;
 
 impl Plugin for PlayerManagementPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<KillPlayerEvent>()
-            .add_systems(Update, add_player_sensors) // ran when LDTK spawns the player
-            .add_systems(FixedUpdate, move_player.before(PhysicsSet::SyncBackend))
+        app.add_systems(Update, add_player_sensors) // ran when LDTK spawns the player
+            .add_systems(
+                FixedUpdate,
+                move_player
+                    .before(PhysicsSet::SyncBackend)
+                    .in_set(GameUpdateSet),
+            )
             .add_systems(
                 Update,
                 queue_jump
@@ -41,8 +48,8 @@ impl Plugin for PlayerManagementPlugin {
                     .after(handle_color_switch)
                     .after(update_cursor_world_coords),
             )
-            .add_systems(Update, reset_player_on_level_switch)
-            .add_systems(Update, reset_player_position)
+            .add_systems(OnEnter(GameState::Playing), reset_player_on_level_switch)
+            .add_systems(OnEnter(GameState::Respawning), reset_player_position)
             .add_systems(
                 Update,
                 quick_reset.run_if(input_just_pressed(KeyCode::KeyR)),
@@ -83,7 +90,14 @@ pub struct LdtkPlayerBundle {
     instance: EntityInstance,
 }
 
-/// [`System`] that will send a [`KillPlayerEvent`] when the "R" key is pressed.
-fn quick_reset(mut ev_kill_player: EventWriter<KillPlayerEvent>) {
-    ev_kill_player.send(KillPlayerEvent);
+/// [`System`] that will cause a state switch to [`GameState::Respawning`] when the "R" key is pressed.
+fn quick_reset(
+    game_state: Res<State<GameState>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
+) {
+    dbg!(game_state.get());
+    match game_state.get() {
+        GameState::Playing => next_game_state.set(GameState::Respawning),
+        _ => (),
+    };
 }

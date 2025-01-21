@@ -1,3 +1,4 @@
+use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 /// Labels used for rapier_2d [`CollisionGroups`]
@@ -12,3 +13,13 @@ impl GroupLabel {
     pub const HURT_BOX: Group = Group::GROUP_6;
     pub const WHITE_RAY: Group = Group::GROUP_7;
 }
+
+#[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum GameState {
+    Playing,
+    Respawning,
+    Switching,
+}
+
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct GameUpdateSet;

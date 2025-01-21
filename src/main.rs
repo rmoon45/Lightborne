@@ -10,6 +10,7 @@ use input::{init_cursor_world_coords, update_cursor_world_coords};
 use level::LevelManagementPlugin;
 use light::LightManagementPlugin;
 use player::PlayerManagementPlugin;
+use shared::{GameState, GameUpdateSet};
 
 mod camera;
 mod config;
@@ -51,7 +52,13 @@ fn main() {
         .add_plugins(LevelManagementPlugin)
         .add_plugins(LightManagementPlugin)
         .add_plugins(CameraPlugin)
+        .insert_state(GameState::Playing)
         .add_systems(Startup, init_cursor_world_coords)
         .add_systems(Update, update_cursor_world_coords)
+        .configure_sets(Update, GameUpdateSet.run_if(in_state(GameState::Playing)))
+        .configure_sets(
+            FixedUpdate,
+            GameUpdateSet.run_if(in_state(GameState::Playing)),
+        )
         .run();
 }

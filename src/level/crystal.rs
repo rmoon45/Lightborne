@@ -1,10 +1,11 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
+use crate::shared::GameState;
+
 use super::{
     activatable::{init_activatable, update_activatables, Activatable, Activated},
     entity::FixedEntityBundle,
-    LevelSwitchEvent,
 };
 
 /// [`Plugin`] for managing all things related to [`Crystal`]s. This plugin responds to the
@@ -20,7 +21,7 @@ impl Plugin for CrystalPlugin {
                 Update,
                 (on_crystal_added, on_crystal_changed).after(update_activatables),
             )
-            .add_systems(Update, reset_crystals);
+            .add_systems(OnEnter(GameState::Playing), reset_crystals);
     }
 }
 
@@ -63,14 +64,8 @@ pub fn on_crystal_added(
 /// when switching between rooms.
 pub fn reset_crystals(
     mut commands: Commands,
-    mut ev_level_switch: EventReader<LevelSwitchEvent>,
     mut q_crystals: Query<(Entity, &Activatable), With<Crystal>>,
 ) {
-    if ev_level_switch.is_empty() {
-        return;
-    }
-    ev_level_switch.clear();
-
     for (entity, activatable) in q_crystals.iter_mut() {
         if activatable.init_active {
             commands.entity(entity).insert(Activated);
