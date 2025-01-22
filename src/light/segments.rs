@@ -7,7 +7,7 @@ use super::{
     sensor::{HitByLight, LightSensor},
     LightColor, LightRaySource, LIGHT_SPEED,
 };
-use crate::{level::LevelSwitchEvent, shared::GroupLabel};
+use crate::shared::GroupLabel;
 
 /// Marker [`Component`] used to query for light segments.
 #[derive(Default, Component, Clone, Debug)]
@@ -176,15 +176,9 @@ pub fn tick_light_sources(mut q_light_sources: Query<&mut LightRaySource>) {
 pub fn cleanup_light_sources(
     mut commands: Commands,
     q_light_sources: Query<Entity, With<LightRaySource>>,
-    mut ev_level_switch: EventReader<LevelSwitchEvent>,
     segment_cache: Res<LightSegmentCache>,
     mut q_segments: Query<(&mut Transform, &mut Visibility), With<LightSegmentMarker>>,
 ) {
-    if ev_level_switch.is_empty() {
-        return;
-    }
-    ev_level_switch.clear();
-
     // FIXME: should make these entities children of the level so that they are despawned
     // automagically (?)
 

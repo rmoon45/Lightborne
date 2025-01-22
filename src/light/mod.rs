@@ -10,6 +10,8 @@ use segments::{
 };
 use sensor::{reset_light_sensors, update_light_sensors};
 
+use crate::{level::LevelSystems, shared::GameState};
+
 mod render;
 pub mod segments;
 pub mod sensor;
@@ -28,11 +30,20 @@ impl Plugin for LightManagementPlugin {
         app.add_plugins(Material2dPlugin::<LightMaterial>::default())
             .init_resource::<LightRenderData>()
             .init_resource::<LightSegmentCache>()
-            .add_systems(Update, simulate_light_sources)
-            .add_systems(Update, update_light_sensors.after(simulate_light_sources))
-            .add_systems(Update, cleanup_light_sources.before(simulate_light_sources))
-            .add_systems(Update, reset_light_sensors.before(update_light_sensors))
-            .add_systems(FixedUpdate, tick_light_sources);
+            .add_systems(
+                Update,
+                (simulate_light_sources, update_light_sensors)
+                    .chain()
+                    .in_set(LevelSystems::Simulation),
+            )
+            .add_systems(
+                OnEnter(GameState::Playing),
+                (cleanup_light_sources, reset_light_sensors),
+            )
+            .add_systems(
+                FixedUpdate,
+                tick_light_sources.in_set(LevelSystems::Simulation),
+            );
     }
 }
 

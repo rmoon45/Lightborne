@@ -6,8 +6,7 @@ use std::time::Duration;
 use crate::{
     level::{
         activatable::GroupTriggeredEvent,
-        interactable::{init_interactable, Interactable},
-        LevelSwitchEvent,
+        interactable::{init_interactable, Interactable, InteractableSFX},
     },
     shared::GroupLabel,
 };
@@ -75,15 +74,7 @@ impl From<&EntityInstance> for LightSensorBundle {
 }
 
 /// [`System`] that resets the [`LightSensor`]s when a [`LevelSwitchEvent`] is received.
-pub fn reset_light_sensors(
-    mut q_sensors: Query<&mut LightSensor>,
-    mut ev_level_switch: EventReader<LevelSwitchEvent>,
-) {
-    if ev_level_switch.is_empty() {
-        return;
-    }
-    ev_level_switch.clear();
-
+pub fn reset_light_sensors(mut q_sensors: Query<&mut LightSensor>) {
     for mut sensor in q_sensors.iter_mut() {
         sensor.activation_timer.reset();
         sensor.activation_timer.pause();
@@ -98,7 +89,15 @@ pub fn reset_light_sensors(
 pub fn update_light_sensors(
     mut commands: Commands,
     mut q_non_interactions: Query<(&mut LightSensor, &Interactable), Without<HitByLight>>,
-    mut q_interactions: Query<(Entity, &mut LightSensor, &Interactable), With<HitByLight>>,
+    mut q_interactions: Query<
+        (
+            Entity,
+            &mut LightSensor,
+            &Interactable,
+            Option<&InteractableSFX>,
+        ),
+        With<HitByLight>,
+    >,
     mut ev_group_triggered: EventWriter<GroupTriggeredEvent>,
     time: Res<Time>,
 ) {
@@ -116,7 +115,7 @@ pub fn update_light_sensors(
         sensor.was_hit = false;
     }
 
-    for (entity, mut sensor, interactable) in q_interactions.iter_mut() {
+    for (entity, mut sensor, interactable, sfx) in q_interactions.iter_mut() {
         if sensor.activation_timer.paused() {
             sensor.activation_timer.unpause();
         }
@@ -131,6 +130,18 @@ pub fn update_light_sensors(
             ev_group_triggered.send(GroupTriggeredEvent {
                 id: interactable.id,
             });
+
+            // FIXME: this feels rather hard coded, the interactable on_triggered effect sound
+            // play should only have to be written once, in a system them handles all interactables
+            // and not only light sensors
+            if let Some(sfx) = sfx {
+                if let Some(on_triggered) = &sfx.on_triggered {
+                    commands.entity(entity).insert((
+                        AudioPlayer::new(on_triggered.clone()),
+                        PlaybackSettings::REMOVE,
+                    ));
+                }
+            }
         }
         sensor.was_hit = true;
 

@@ -5,9 +5,9 @@ use bevy::{
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::input::update_cursor_world_coords;
+use crate::{input::update_cursor_world_coords, level::LevelSystems, shared::GameState};
 
-use kill::{reset_player_on_level_switch, reset_player_position, KillPlayerEvent};
+use kill::{reset_player_on_level_switch, reset_player_position};
 use light::{handle_color_switch, preview_light_path, shoot_light, PlayerLightInventory};
 use movement::{move_player, queue_jump, PlayerMovement};
 use spawn::{add_player_sensors, init_player_bundle};
@@ -22,31 +22,42 @@ pub struct PlayerManagementPlugin;
 
 impl Plugin for PlayerManagementPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<KillPlayerEvent>()
-            .add_systems(Update, add_player_sensors) // ran when LDTK spawns the player
-            .add_systems(FixedUpdate, move_player)
-            .add_systems(
-                Update,
-                queue_jump
-                    .run_if(input_just_pressed(KeyCode::Space))
-                    .before(move_player),
+        app.add_systems(
+            PreUpdate,
+            add_player_sensors.in_set(LevelSystems::Processing),
+        )
+        .add_systems(
+            FixedUpdate,
+            move_player
+                .before(PhysicsSet::SyncBackend)
+                .in_set(LevelSystems::Simulation),
+        )
+        .add_systems(
+            Update,
+            queue_jump
+                .run_if(input_just_pressed(KeyCode::Space))
+                .before(move_player)
+                .in_set(LevelSystems::Simulation),
+        )
+        .add_systems(
+            Update,
+            (
+                handle_color_switch,
+                preview_light_path.run_if(input_pressed(MouseButton::Left)),
+                shoot_light.run_if(input_just_released(MouseButton::Left)),
             )
-            .add_systems(Update, handle_color_switch)
-            .add_systems(
-                Update,
-                (
-                    preview_light_path.run_if(input_pressed(MouseButton::Left)),
-                    shoot_light.run_if(input_just_released(MouseButton::Left)),
-                )
-                    .after(handle_color_switch)
-                    .after(update_cursor_world_coords),
-            )
-            .add_systems(Update, reset_player_on_level_switch)
-            .add_systems(Update, reset_player_position)
-            .add_systems(
-                Update,
-                quick_reset.run_if(input_just_pressed(KeyCode::KeyR)),
-            );
+                .chain()
+                .in_set(LevelSystems::Simulation)
+                .after(update_cursor_world_coords),
+        )
+        .add_systems(OnEnter(GameState::Playing), reset_player_on_level_switch)
+        .add_systems(OnEnter(GameState::Respawning), reset_player_position)
+        .add_systems(
+            Update,
+            quick_reset
+                .run_if(input_just_pressed(KeyCode::KeyR))
+                .run_if(in_state(GameState::Playing)),
+        );
     }
 }
 
@@ -83,7 +94,7 @@ pub struct LdtkPlayerBundle {
     instance: EntityInstance,
 }
 
-/// [`System`] that will send a [`KillPlayerEvent`] when the "R" key is pressed.
-fn quick_reset(mut ev_kill_player: EventWriter<KillPlayerEvent>) {
-    ev_kill_player.send(KillPlayerEvent);
+/// [`System`] that will cause a state switch to [`GameState::Respawning`] when the "R" key is pressed.
+fn quick_reset(mut next_game_state: ResMut<NextState<GameState>>) {
+    next_game_state.set(GameState::Respawning);
 }

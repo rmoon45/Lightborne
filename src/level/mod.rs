@@ -1,10 +1,13 @@
 use bevy::prelude::*;
-use bevy_ecs_ldtk::prelude::*;
+use bevy_ecs_ldtk::{prelude::*, systems::process_ldtk_levels};
 
-use crate::player::{LdtkPlayerBundle, PlayerMarker};
+use crate::{
+    player::{LdtkPlayerBundle, PlayerMarker},
+    shared::GameState,
+};
 use activatable::ActivatablePlugin;
 use crystal::CrystalPlugin;
-use misc::{init_start_marker, ButtonBundle, StartFlagBundle};
+use misc::{init_start_marker, process_buttons, ButtonBundle, StartFlagBundle};
 use setup::LevelSetupPlugin;
 use walls::{spawn_wall_collision, WallBundle};
 
@@ -25,7 +28,6 @@ impl Plugin for LevelManagementPlugin {
             .add_plugins(LevelSetupPlugin)
             .add_plugins(ActivatablePlugin)
             .add_plugins(CrystalPlugin)
-            .add_event::<LevelSwitchEvent>()
             .init_resource::<CurrentLevel>()
             .insert_resource(LdtkSettings {
                 level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation {
@@ -37,9 +39,24 @@ impl Plugin for LevelManagementPlugin {
             .register_ldtk_entity::<ButtonBundle>("Button")
             .register_ldtk_entity::<StartFlagBundle>("Start")
             .register_ldtk_int_cell::<WallBundle>(1)
-            .add_systems(Update, spawn_wall_collision)
-            .add_systems(Update, init_start_marker)
-            .add_systems(Update, switch_level);
+            .add_systems(
+                PreUpdate,
+                (spawn_wall_collision, init_start_marker, process_buttons)
+                    .in_set(LevelSystems::Processing),
+            )
+            .add_systems(Update, switch_level)
+            .configure_sets(
+                PreUpdate,
+                LevelSystems::Processing.after(process_ldtk_levels),
+            )
+            .configure_sets(
+                Update,
+                LevelSystems::Simulation.run_if(in_state(GameState::Playing)),
+            )
+            .configure_sets(
+                FixedUpdate,
+                LevelSystems::Simulation.run_if(in_state(GameState::Playing)),
+            );
     }
 }
 
@@ -50,10 +67,14 @@ pub struct CurrentLevel {
     pub world_box: Rect,
 }
 
-/// [`Event`] that will be sent to inform other systems that the level is switching and should be
-/// reinitialized.
-#[derive(Event)]
-pub struct LevelSwitchEvent;
+/// [`SystemSet`] used to distinguish different types of systems
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum LevelSystems {
+    /// Systems used to simulate game logic in [`Update`]
+    Simulation,
+    /// Systems used to process Ldtk Entities after they spawn in [`PreUpdate`]
+    Processing,
+}
 
 /// [`System`] that will run on [`Update`] to check if the Player has moved to another level. If
 /// the player has, then a [`LevelSwitchEvent`] will be sent out to notify other systems.
@@ -63,7 +84,7 @@ fn switch_level(
     mut level_selection: ResMut<LevelSelection>,
     ldtk_projects: Query<&LdtkProjectHandle>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
-    mut ev_level_switch: EventWriter<LevelSwitchEvent>,
+    mut next_game_state: ResMut<NextState<GameState>>,
     mut current_level: ResMut<CurrentLevel>,
 ) {
     let Ok((transform, instance)) = q_player.get_single() else {
@@ -95,7 +116,10 @@ fn switch_level(
         if world_box.contains(player_box.center()) {
             // ev_move_camera.send(MoveCameraEvent(world_box.center()));
             if current_level.level_iid != level_iid.as_str() {
-                ev_level_switch.send(LevelSwitchEvent);
+                if !current_level.level_iid.is_empty() {
+                    next_game_state.set(GameState::Switching);
+                }
+
                 *current_level = CurrentLevel {
                     level_iid: level_iid.to_string(),
                     world_box,

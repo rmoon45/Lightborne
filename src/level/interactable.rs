@@ -10,6 +10,11 @@ pub struct Interactable {
     pub id: i32,
 }
 
+#[derive(Component)]
+pub struct InteractableSFX {
+    pub on_triggered: Option<Handle<AudioSource>>,
+}
+
 /// Used with the proc macro `#[with(init_interactable)]` to inialize the [`Interactable`]
 /// [`Component`] on a given [`Bundle`] registered with Ldtk as an [`LdtkEntity`].
 pub fn init_interactable(entity_instance: &EntityInstance) -> Interactable {
