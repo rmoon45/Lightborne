@@ -7,7 +7,7 @@ use crate::{
 };
 use activatable::ActivatablePlugin;
 use crystal::CrystalPlugin;
-use misc::{init_start_marker, ButtonBundle, StartFlagBundle};
+use misc::{init_start_marker, process_buttons, ButtonBundle, StartFlagBundle};
 use setup::LevelSetupPlugin;
 use walls::{spawn_wall_collision, WallBundle};
 
@@ -41,7 +41,8 @@ impl Plugin for LevelManagementPlugin {
             .register_ldtk_int_cell::<WallBundle>(1)
             .add_systems(
                 PreUpdate,
-                (spawn_wall_collision, init_start_marker).in_set(LevelSystems::Processing),
+                (spawn_wall_collision, init_start_marker, process_buttons)
+                    .in_set(LevelSystems::Processing),
             )
             .add_systems(Update, switch_level)
             .configure_sets(
