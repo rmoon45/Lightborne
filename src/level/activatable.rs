@@ -4,6 +4,8 @@ use prelude::LdtkFields;
 
 use crate::light::sensor::update_light_sensors;
 
+use super::LevelSystems;
+
 /// [`Plugin`] that manages all activatables in the game, e.g. [`LightSensor`](crate::light::sensor::LightSensor).
 /// See [`Activatable`] for more information.
 pub struct ActivatablePlugin;
@@ -13,12 +15,14 @@ impl Plugin for ActivatablePlugin {
         app.init_resource::<ActivatableCache>()
             .add_event::<GroupTriggeredEvent>()
             .add_systems(
+                PreUpdate,
+                setup_activatables.in_set(LevelSystems::Processing),
+            )
+            .add_systems(
                 Update,
-                (
-                    setup_activatables,
-                    update_activatables.after(update_light_sensors),
-                )
-                    .chain(),
+                update_activatables
+                    .after(update_light_sensors)
+                    .in_set(LevelSystems::Simulation),
             );
     }
 }

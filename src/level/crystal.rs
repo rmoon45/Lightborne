@@ -6,6 +6,7 @@ use crate::shared::GameState;
 use super::{
     activatable::{init_activatable, update_activatables, Activatable, Activated},
     entity::FixedEntityBundle,
+    LevelSystems,
 };
 
 /// [`Plugin`] for managing all things related to [`Crystal`]s. This plugin responds to the
@@ -17,9 +18,12 @@ impl Plugin for CrystalPlugin {
     fn build(&self, app: &mut App) {
         app.register_ldtk_entity::<CrystalBundle>("RedCrystal")
             .register_ldtk_entity::<CrystalBundle>("GreenCrystal")
+            .add_systems(PreUpdate, on_crystal_added.in_set(LevelSystems::Processing))
             .add_systems(
                 Update,
-                (on_crystal_added, on_crystal_changed).after(update_activatables),
+                on_crystal_changed
+                    .after(update_activatables)
+                    .in_set(LevelSystems::Simulation),
             )
             .add_systems(OnEnter(GameState::Playing), reset_crystals);
     }

@@ -20,6 +20,3 @@ pub enum GameState {
     Respawning,
     Switching,
 }
-
-#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct GameUpdateSet;

@@ -10,7 +10,7 @@ use segments::{
 };
 use sensor::{reset_light_sensors, update_light_sensors};
 
-use crate::shared::{GameState, GameUpdateSet};
+use crate::{level::LevelSystems, shared::GameState};
 
 mod render;
 pub mod segments;
@@ -34,13 +34,16 @@ impl Plugin for LightManagementPlugin {
                 Update,
                 (simulate_light_sources, update_light_sensors)
                     .chain()
-                    .in_set(GameUpdateSet),
+                    .in_set(LevelSystems::Simulation),
             )
             .add_systems(
                 OnEnter(GameState::Playing),
                 (cleanup_light_sources, reset_light_sensors),
             )
-            .add_systems(FixedUpdate, tick_light_sources.in_set(GameUpdateSet));
+            .add_systems(
+                FixedUpdate,
+                tick_light_sources.in_set(LevelSystems::Simulation),
+            );
     }
 }
 

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_ecs_ldtk::prelude::*;
+use bevy_ecs_ldtk::{prelude::*, systems::process_ldtk_levels};
 
 use crate::{
     player::{LdtkPlayerBundle, PlayerMarker},
@@ -39,9 +39,23 @@ impl Plugin for LevelManagementPlugin {
             .register_ldtk_entity::<ButtonBundle>("Button")
             .register_ldtk_entity::<StartFlagBundle>("Start")
             .register_ldtk_int_cell::<WallBundle>(1)
-            .add_systems(Update, spawn_wall_collision)
-            .add_systems(Update, init_start_marker)
-            .add_systems(Update, switch_level);
+            .add_systems(
+                PreUpdate,
+                (spawn_wall_collision, init_start_marker).in_set(LevelSystems::Processing),
+            )
+            .add_systems(Update, switch_level)
+            .configure_sets(
+                PreUpdate,
+                LevelSystems::Processing.after(process_ldtk_levels),
+            )
+            .configure_sets(
+                Update,
+                LevelSystems::Simulation.run_if(in_state(GameState::Playing)),
+            )
+            .configure_sets(
+                FixedUpdate,
+                LevelSystems::Simulation.run_if(in_state(GameState::Playing)),
+            );
     }
 }
 
@@ -50,6 +64,15 @@ impl Plugin for LevelManagementPlugin {
 pub struct CurrentLevel {
     pub level_iid: String,
     pub world_box: Rect,
+}
+
+/// [`SystemSet`] used to distinguish different types of systems
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum LevelSystems {
+    /// Systems used to simulate game logic in [`Update`]
+    Simulation,
+    /// Systems used to process Ldtk Entities after they spawn in [`PreUpdate`]
+    Processing,
 }
 
 /// [`System`] that will run on [`Update`] to check if the Player has moved to another level. If
