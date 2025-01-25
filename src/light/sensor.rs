@@ -18,6 +18,21 @@ use crate::{
 #[component(storage = "SparseSet")]
 pub struct HitByLight;
 
+/// [`Event`] used to notify other entities to trigger based on collision with light.
+#[derive(Event)]
+pub struct HitByLightEvent {
+    /// Stores the id of the corresponding entity/entities to trigger
+    pub id: i32,
+}
+
+impl Default for HitByLightEvent {
+    fn default() -> Self {
+        HitByLightEvent {
+            id: 0,
+        }
+    }
+}
+
 /// [`Component`] added to entities receptive to light. The
 /// [`activation_timer`](LightSensor::activation_timer) should be initialized in the
 /// `From<&EntityInstance>` implemenation for the [`LightSensorBundle`], if not default.
