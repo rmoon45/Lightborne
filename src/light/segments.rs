@@ -4,7 +4,7 @@ use enum_map::EnumMap;
 
 use super::{
     render::{LightMaterial, LightRenderData},
-    sensor::{HitByLight, LightSensor},
+    sensor::{HitByLight, HitByLightEvent, LightSensor},
     LightColor, LightRaySource, LIGHT_SPEED,
 };
 use crate::shared::GroupLabel;
@@ -85,9 +85,9 @@ impl FromWorld for LightSegmentCache {
 /// Similar logic is duplicated in [`preview_light_path`](crate::player::light::preview_light_path),
 /// these two systems should be merged.
 pub fn simulate_light_sources(
-    mut commands: Commands,
     q_light_sources: Query<&LightRaySource>,
     mut q_rapier: Query<&mut RapierContext>,
+    mut ev_hit_by_light: EventWriter<HitByLightEvent>,
     q_light_sensor: Query<&LightSensor>,
     mut q_segments: Query<(&mut Transform, &mut Visibility), With<LightSegmentMarker>>,
     segment_cache: Res<LightSegmentCache>,
@@ -136,7 +136,7 @@ pub fn simulate_light_sources(
             pts.push(intersection.point);
 
             if q_light_sensor.contains(entity) {
-                commands.entity(entity).insert(HitByLight);
+                ev_hit_by_light.send(HitByLightEvent(entity));
             };
 
             ray_pos = intersection.point;

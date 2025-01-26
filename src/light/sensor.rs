@@ -11,27 +11,18 @@ use crate::{
     shared::GroupLabel,
 };
 
-/// [`Component`] used to mark components that have been hit by light. The current design of the
-/// system is very bad, an event like `HitByLightEvent(Entity)` should be used instead to signal
-/// the [`LightSensor`]s to activate.
-#[derive(Default, Component)]
-#[component(storage = "SparseSet")]
-pub struct HitByLight;
+// [`Component`] used to mark components that have been hit by light. The current design of the
+// system is very bad, an event like `HitByLightEvent(Entity)` should be used instead to signal
+// the [`LightSensor`]s to activate.
+//#[derive(Default, Component)]
+//#[component(storage = "SparseSet")]
+//pub struct HitByLight;
 
 /// [`Event`] used to notify other entities to trigger based on collision with light.
+/// An included [`Entity`] id is used to signal the [`LightSensor`]s to activate and
+/// corresponding [`Interactable`]s.
 #[derive(Event)]
-pub struct HitByLightEvent {
-    /// Stores the id of the corresponding entity/entities to trigger
-    pub id: i32,
-}
-
-impl Default for HitByLightEvent {
-    fn default() -> Self {
-        HitByLightEvent {
-            id: 0,
-        }
-    }
-}
+pub struct HitByLightEvent(pub Entity);
 
 /// [`Component`] added to entities receptive to light. The
 /// [`activation_timer`](LightSensor::activation_timer) should be initialized in the
@@ -114,6 +105,7 @@ pub fn update_light_sensors(
         With<HitByLight>,
     >,
     mut ev_group_triggered: EventWriter<GroupTriggeredEvent>,
+    mut ev_hit_by_light: EventReader<HitByLightEvent>,
     time: Res<Time>,
 ) {
     for (mut sensor, interactable) in q_non_interactions.iter_mut() {
