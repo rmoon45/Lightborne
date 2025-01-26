@@ -64,6 +64,7 @@ impl Plugin for LevelManagementPlugin {
 #[derive(Default, Resource)]
 pub struct CurrentLevel {
     pub level_iid: String,
+    pub level_entity: Option<Entity>,
     pub world_box: Rect,
 }
 
@@ -80,7 +81,7 @@ pub enum LevelSystems {
 /// the player has, then a [`LevelSwitchEvent`] will be sent out to notify other systems.
 fn switch_level(
     q_player: Query<(&Transform, &EntityInstance), With<PlayerMarker>>,
-    q_level: Query<&LevelIid>,
+    q_level: Query<(Entity, &LevelIid)>,
     mut level_selection: ResMut<LevelSelection>,
     ldtk_projects: Query<&LdtkProjectHandle>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
@@ -90,7 +91,7 @@ fn switch_level(
     let Ok((transform, instance)) = q_player.get_single() else {
         return;
     };
-    for level_iid in q_level.iter() {
+    for (entity, level_iid) in q_level.iter() {
         let ldtk_project = ldtk_project_assets
             .get(ldtk_projects.single())
             .expect("Project should be loaded if level has spawned");
@@ -122,6 +123,7 @@ fn switch_level(
 
                 *current_level = CurrentLevel {
                     level_iid: level_iid.to_string(),
+                    level_entity: Some(entity),
                     world_box,
                 };
                 *level_selection = LevelSelection::iid(level_iid.to_string());
