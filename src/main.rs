@@ -1,4 +1,4 @@
-use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
+use bevy::diagnostic::LogDiagnosticsPlugin;
 use bevy::ecs::schedule::{LogLevel, ScheduleBuildSettings};
 use bevy::prelude::*;
 use bevy::window::PresentMode;
@@ -6,6 +6,7 @@ use bevy_rapier2d::prelude::*;
 
 use camera::CameraPlugin;
 use config::ConfigPlugin;
+use debug::DebugPlugin;
 use input::{init_cursor_world_coords, update_cursor_world_coords};
 use level::LevelManagementPlugin;
 use light::LightManagementPlugin;
@@ -15,6 +16,7 @@ use shared::GameState;
 
 mod camera;
 mod config;
+mod debug;
 mod input;
 mod level;
 mod light;
@@ -47,14 +49,13 @@ fn main() {
         })
         .add_plugins(ConfigPlugin)
         .add_plugins(LogDiagnosticsPlugin::default())
-        .add_plugins(FrameTimeDiagnosticsPlugin)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(8.0).in_fixed_schedule())
-        // .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(PlayerManagementPlugin)
         .add_plugins(LevelManagementPlugin)
         .add_plugins(LightManagementPlugin)
         .add_plugins(PausePlugin)
         .add_plugins(CameraPlugin)
+        .add_plugins(DebugPlugin::default())
         .insert_state(GameState::Playing)
         .add_systems(Startup, init_cursor_world_coords)
         .add_systems(Update, update_cursor_world_coords)
