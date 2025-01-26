@@ -3,7 +3,7 @@ use bevy_ecs_ldtk::{prelude::*, systems::process_ldtk_levels};
 
 use crate::{
     player::{LdtkPlayerBundle, PlayerMarker},
-    shared::GameState,
+    shared::{GameState, ResetLevel},
 };
 use activatable::ActivatablePlugin;
 use crystal::CrystalPlugin;
@@ -85,7 +85,7 @@ fn switch_level(
     mut level_selection: ResMut<LevelSelection>,
     ldtk_projects: Query<&LdtkProjectHandle>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
-    mut next_game_state: ResMut<NextState<GameState>>,
+    mut ev_reset_level: EventWriter<ResetLevel>,
     mut current_level: ResMut<CurrentLevel>,
 ) {
     let Ok((transform, instance)) = q_player.get_single() else {
@@ -118,7 +118,7 @@ fn switch_level(
             // ev_move_camera.send(MoveCameraEvent(world_box.center()));
             if current_level.level_iid != level_iid.as_str() {
                 if !current_level.level_iid.is_empty() {
-                    next_game_state.set(GameState::Switching);
+                    ev_reset_level.send(ResetLevel::Switching);
                 }
 
                 *current_level = CurrentLevel {

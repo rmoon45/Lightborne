@@ -12,7 +12,7 @@ use level::LevelManagementPlugin;
 use light::LightManagementPlugin;
 use pause::PausePlugin;
 use player::PlayerManagementPlugin;
-use shared::GameState;
+use shared::{GameState, ResetLevel};
 
 mod camera;
 mod config;
@@ -57,6 +57,7 @@ fn main() {
         .add_plugins(CameraPlugin)
         .add_plugins(DebugPlugin::default())
         .insert_state(GameState::Playing)
+        .add_event::<ResetLevel>()
         .add_systems(Startup, init_cursor_world_coords)
         .add_systems(Update, update_cursor_world_coords)
         .run();
