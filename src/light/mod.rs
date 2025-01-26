@@ -37,7 +37,11 @@ impl Plugin for LightManagementPlugin {
                     .in_set(LevelSystems::Simulation),
             )
             .add_systems(
-                OnEnter(GameState::Playing),
+                OnExit(GameState::Switching),
+                (cleanup_light_sources, reset_light_sensors),
+            )
+            .add_systems(
+                OnExit(GameState::Respawning),
                 (cleanup_light_sources, reset_light_sensors),
             )
             .add_systems(

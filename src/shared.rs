@@ -19,4 +19,5 @@ pub enum GameState {
     Playing,
     Respawning,
     Switching,
+    Paused,
 }
