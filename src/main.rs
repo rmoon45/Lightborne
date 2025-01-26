@@ -2,6 +2,7 @@ use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::ecs::schedule::{LogLevel, ScheduleBuildSettings};
 use bevy::prelude::*;
 use bevy::window::PresentMode;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_rapier2d::prelude::*;
 
 use camera::CameraPlugin;
@@ -52,6 +53,7 @@ fn main() {
         .add_plugins(LevelManagementPlugin)
         .add_plugins(LightManagementPlugin)
         .add_plugins(CameraPlugin)
+        .add_plugins(WorldInspectorPlugin::new())
         .insert_state(GameState::Playing)
         .add_systems(Startup, init_cursor_world_coords)
         .add_systems(Update, update_cursor_world_coords)
