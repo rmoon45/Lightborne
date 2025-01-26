@@ -9,6 +9,7 @@ use config::ConfigPlugin;
 use input::{init_cursor_world_coords, update_cursor_world_coords};
 use level::LevelManagementPlugin;
 use light::LightManagementPlugin;
+use pause::PausePlugin;
 use player::PlayerManagementPlugin;
 use shared::GameState;
 
@@ -17,6 +18,7 @@ mod config;
 mod input;
 mod level;
 mod light;
+mod pause;
 mod player;
 mod shared;
 
@@ -51,6 +53,7 @@ fn main() {
         .add_plugins(PlayerManagementPlugin)
         .add_plugins(LevelManagementPlugin)
         .add_plugins(LightManagementPlugin)
+        .add_plugins(PausePlugin)
         .add_plugins(CameraPlugin)
         .insert_state(GameState::Playing)
         .add_systems(Startup, init_cursor_world_coords)

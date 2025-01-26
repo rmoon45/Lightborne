@@ -25,7 +25,8 @@ impl Plugin for CrystalPlugin {
                     .after(update_activatables)
                     .in_set(LevelSystems::Simulation),
             )
-            .add_systems(OnEnter(GameState::Playing), reset_crystals);
+            .add_systems(OnExit(GameState::Switching), reset_crystals)
+            .add_systems(OnExit(GameState::Respawning), reset_crystals);
     }
 }
 
