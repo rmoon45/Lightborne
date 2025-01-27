@@ -141,56 +141,8 @@ pub fn update_light_sensors(
                             PlaybackSettings::REMOVE,
                         ));
                     }
-            }
-        }
-            }
-        }
-    }
-
-    for (mut sensor, interactable) in q_non_interactions.iter_mut() {
-        sensor.activation_timer.tick(time.delta());
-
-        if sensor.was_hit {
-            sensor.activation_timer.reset();
-        }
-        if sensor.activation_timer.just_finished() {
-            ev_group_triggered.send(GroupTriggeredEvent {
-                id: interactable.id,
-            });
-        }
-        sensor.was_hit = false;
-    }
-
-    for (entity, mut sensor, interactable, sfx) in q_interactions.iter_mut() {
-        if sensor.activation_timer.paused() {
-            sensor.activation_timer.unpause();
-        }
-
-        sensor.cumulative_exposure.tick(time.delta());
-        sensor.activation_timer.tick(time.delta());
-
-        if !sensor.was_hit {
-            sensor.activation_timer.reset();
-        }
-        if sensor.activation_timer.just_finished() {
-            ev_group_triggered.send(GroupTriggeredEvent {
-                id: interactable.id,
-            });
-
-            // FIXME: this feels rather hard coded, the interactable on_triggered effect sound
-            // play should only have to be written once, in a system them handles all interactables
-            // and not only light sensors
-            if let Some(sfx) = sfx {
-                if let Some(on_triggered) = &sfx.on_triggered {
-                    commands.entity(entity).insert((
-                        AudioPlayer::new(on_triggered.clone()),
-                        PlaybackSettings::REMOVE,
-                    ));
                 }
             }
         }
-        sensor.was_hit = true;
-
-        commands.entity(entity).remove::<HitByLight>();
     }
 }
