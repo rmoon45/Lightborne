@@ -5,7 +5,11 @@ use bevy::{
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{input::update_cursor_world_coords, level::LevelSystems, shared::GameState};
+use crate::{
+    input::update_cursor_world_coords,
+    level::LevelSystems,
+    shared::{GameState, ResetLevel},
+};
 
 use kill::{reset_player_on_level_switch, reset_player_position};
 use light::{handle_color_switch, preview_light_path, shoot_light, PlayerLightInventory};
@@ -50,9 +54,11 @@ impl Plugin for PlayerManagementPlugin {
                 .in_set(LevelSystems::Simulation)
                 .after(update_cursor_world_coords),
         )
-        .add_systems(OnExit(GameState::Switching), reset_player_on_level_switch)
-        .add_systems(OnExit(GameState::Respawning), reset_player_on_level_switch)
-        .add_systems(OnEnter(GameState::Respawning), reset_player_position)
+        .add_systems(
+            FixedUpdate,
+            reset_player_on_level_switch.run_if(on_event::<ResetLevel>),
+        )
+        .add_systems(FixedUpdate, reset_player_position)
         .add_systems(
             Update,
             quick_reset
@@ -96,6 +102,6 @@ pub struct LdtkPlayerBundle {
 }
 
 /// [`System`] that will cause a state switch to [`GameState::Respawning`] when the "R" key is pressed.
-fn quick_reset(mut next_game_state: ResMut<NextState<GameState>>) {
-    next_game_state.set(GameState::Respawning);
+fn quick_reset(mut ev_reset_level: EventWriter<ResetLevel>) {
+    ev_reset_level.send(ResetLevel::Respawn);
 }

@@ -48,6 +48,5 @@ fn toggle_pause(state: Res<State<GameState>>, mut next_state: ResMut<NextState<G
     next_state.set(match state.get() {
         GameState::Paused => GameState::Playing,
         GameState::Playing => GameState::Paused,
-        x => x.clone(),
     })
 }

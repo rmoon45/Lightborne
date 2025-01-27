@@ -17,7 +17,11 @@ impl GroupLabel {
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum GameState {
     Playing,
-    Respawning,
-    Switching,
     Paused,
+}
+
+#[derive(Event, PartialEq, Eq)]
+pub enum ResetLevel {
+    Respawn,
+    Switching,
 }
