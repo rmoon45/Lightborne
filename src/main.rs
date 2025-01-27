@@ -1,5 +1,4 @@
 use bevy::diagnostic::LogDiagnosticsPlugin;
-use bevy::ecs::schedule::{LogLevel, ScheduleBuildSettings};
 use bevy::prelude::*;
 use bevy::window::PresentMode;
 use bevy_rapier2d::prelude::*;
@@ -12,7 +11,7 @@ use level::LevelManagementPlugin;
 use light::LightManagementPlugin;
 use pause::PausePlugin;
 use player::PlayerManagementPlugin;
-use shared::GameState;
+use shared::{GameState, ResetLevel};
 
 mod camera;
 mod config;
@@ -41,12 +40,6 @@ fn main() {
                     ..default()
                 }),
         )
-        .edit_schedule(Update, |schedule| {
-            schedule.set_build_settings(ScheduleBuildSettings {
-                ambiguity_detection: LogLevel::Warn,
-                ..default()
-            });
-        })
         .add_plugins(ConfigPlugin)
         .add_plugins(LogDiagnosticsPlugin::default())
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(8.0).in_fixed_schedule())
@@ -57,6 +50,7 @@ fn main() {
         .add_plugins(CameraPlugin)
         .add_plugins(DebugPlugin::default())
         .insert_state(GameState::Playing)
+        .add_event::<ResetLevel>()
         .add_systems(Startup, init_cursor_world_coords)
         .add_systems(Update, update_cursor_world_coords)
         .run();

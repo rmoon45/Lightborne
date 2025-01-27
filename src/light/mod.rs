@@ -10,7 +10,7 @@ use segments::{
 };
 use sensor::{reset_light_sensors, update_light_sensors};
 
-use crate::{level::LevelSystems, shared::GameState};
+use crate::{level::LevelSystems, shared::ResetLevel};
 
 mod render;
 pub mod segments;
@@ -37,12 +37,8 @@ impl Plugin for LightManagementPlugin {
                     .in_set(LevelSystems::Simulation),
             )
             .add_systems(
-                OnExit(GameState::Switching),
-                (cleanup_light_sources, reset_light_sensors),
-            )
-            .add_systems(
-                OnExit(GameState::Respawning),
-                (cleanup_light_sources, reset_light_sensors),
+                FixedUpdate,
+                (cleanup_light_sources, reset_light_sensors).run_if(on_event::<ResetLevel>),
             )
             .add_systems(
                 FixedUpdate,

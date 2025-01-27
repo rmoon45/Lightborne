@@ -3,7 +3,7 @@ use bevy_ecs_ldtk::{prelude::*, systems::process_ldtk_levels};
 
 use crate::{
     player::{LdtkPlayerBundle, PlayerMarker},
-    shared::GameState,
+    shared::{GameState, ResetLevel},
 };
 use activatable::ActivatablePlugin;
 use crystal::CrystalPlugin;
@@ -80,15 +80,15 @@ pub enum LevelSystems {
 /// [`System`] that will run on [`Update`] to check if the Player has moved to another level. If
 /// the player has, then a [`LevelSwitchEvent`] will be sent out to notify other systems.
 fn switch_level(
-    q_player: Query<(&Transform, &EntityInstance), With<PlayerMarker>>,
+    q_player: Query<&Transform, With<PlayerMarker>>,
     q_level: Query<(Entity, &LevelIid)>,
     mut level_selection: ResMut<LevelSelection>,
     ldtk_projects: Query<&LdtkProjectHandle>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
-    mut next_game_state: ResMut<NextState<GameState>>,
+    mut ev_reset_level: EventWriter<ResetLevel>,
     mut current_level: ResMut<CurrentLevel>,
 ) {
-    let Ok((transform, instance)) = q_player.get_single() else {
+    let Ok(transform) = q_player.get_single() else {
         return;
     };
     for (entity, level_iid) in q_level.iter() {
@@ -102,23 +102,15 @@ fn switch_level(
 
         let world_box = Rect::new(
             level.world_x as f32,
-            level.world_y as f32,
+            -level.world_y as f32,
             (level.world_x + level.px_wid) as f32,
-            (level.world_y - level.px_hei) as f32,
+            (-level.world_y - level.px_hei) as f32,
         );
 
-        let player_box = Rect::new(
-            transform.translation.x,
-            transform.translation.y,
-            transform.translation.x + instance.width as f32,
-            transform.translation.y - instance.height as f32,
-        );
-
-        if world_box.contains(player_box.center()) {
-            // ev_move_camera.send(MoveCameraEvent(world_box.center()));
+        if world_box.contains(transform.translation.xy()) {
             if current_level.level_iid != level_iid.as_str() {
                 if !current_level.level_iid.is_empty() {
-                    next_game_state.set(GameState::Switching);
+                    ev_reset_level.send(ResetLevel::Switching);
                 }
 
                 *current_level = CurrentLevel {
