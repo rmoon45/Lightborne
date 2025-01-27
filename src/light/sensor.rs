@@ -107,13 +107,14 @@ pub fn update_light_sensors(
     }
 
     for (entity, mut sensor, interactable, sfx) in q_sensors.iter_mut() {
-        if sensor.activation_timer.paused() {
-            sensor.activation_timer.unpause();
-        }
-        sensor.activation_timer.tick(time.delta());
-
         if hit_sensors.contains(&entity) {
+            if sensor.activation_timer.paused() {
+                sensor.activation_timer.unpause();
+            }
+
+            sensor.activation_timer.tick(time.delta());
             sensor.cumulative_exposure.tick(time.delta());
+
             if !sensor.was_hit {
                 sensor.activation_timer.reset();
             }
@@ -138,6 +139,8 @@ pub fn update_light_sensors(
 
             sensor.was_hit = true;
         } else {
+            sensor.activation_timer.tick(time.delta());
+
             if sensor.was_hit {
                 sensor.activation_timer.reset();
             }
