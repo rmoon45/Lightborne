@@ -117,15 +117,7 @@ pub fn update_light_sensors(
             if !sensor.was_hit {
                 sensor.activation_timer.reset();
             }
-            if sensor.activation_timer.just_finished() {
-                ev_group_triggered.send(GroupTriggeredEvent {
-                    id: interactable.id,
-                });
-            }
-        } else {
-            if sensor.was_hit {
-                sensor.activation_timer.reset();
-            }
+
             if sensor.activation_timer.just_finished() {
                 ev_group_triggered.send(GroupTriggeredEvent {
                     id: interactable.id,
@@ -143,6 +135,20 @@ pub fn update_light_sensors(
                     }
                 }
             }
+
+            sensor.was_hit = true;
+        } else {
+            if sensor.was_hit {
+                sensor.activation_timer.reset();
+            }
+
+            if sensor.activation_timer.just_finished() {
+                ev_group_triggered.send(GroupTriggeredEvent {
+                    id: interactable.id,
+                });
+            }
+
+            sensor.was_hit = false;
         }
     }
 }
