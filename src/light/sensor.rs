@@ -101,7 +101,7 @@ pub fn update_light_sensors(
     mut ev_hit_by_light: EventReader<HitByLightEvent>,
     time: Res<Time>,
 ) {
-    let mut hit_sensors: EntityHashSet;
+    let mut hit_sensors: EntityHashSet = EntityHashSet::default();
     for ev in ev_hit_by_light.read() {
         hit_sensors.insert(ev.0);
     }

@@ -4,7 +4,7 @@ use enum_map::EnumMap;
 
 use super::{
     render::{LightMaterial, LightRenderData},
-    sensor::{HitByLight, HitByLightEvent, LightSensor},
+    sensor::{HitByLightEvent, LightSensor},
     LightColor, LightRaySource, LIGHT_SPEED,
 };
 use crate::shared::GroupLabel;
