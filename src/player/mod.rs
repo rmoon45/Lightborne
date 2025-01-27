@@ -50,7 +50,8 @@ impl Plugin for PlayerManagementPlugin {
                 .in_set(LevelSystems::Simulation)
                 .after(update_cursor_world_coords),
         )
-        .add_systems(OnEnter(GameState::Playing), reset_player_on_level_switch)
+        .add_systems(OnExit(GameState::Switching), reset_player_on_level_switch)
+        .add_systems(OnExit(GameState::Respawning), reset_player_on_level_switch)
         .add_systems(OnEnter(GameState::Respawning), reset_player_position)
         .add_systems(
             Update,
