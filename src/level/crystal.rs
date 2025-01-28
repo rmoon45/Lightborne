@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
-use crate::shared::GameState;
+use crate::shared::ResetLevel;
 
 use super::{
     activatable::{init_activatable, update_activatables, Activatable, Activated},
@@ -25,7 +25,7 @@ impl Plugin for CrystalPlugin {
                     .after(update_activatables)
                     .in_set(LevelSystems::Simulation),
             )
-            .add_systems(OnEnter(GameState::Playing), reset_crystals);
+            .add_systems(FixedUpdate, reset_crystals.run_if(on_event::<ResetLevel>));
     }
 }
 

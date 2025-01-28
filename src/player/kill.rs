@@ -3,7 +3,7 @@ use bevy_ecs_ldtk::prelude::*;
 
 use crate::{
     level::{misc::StartFlag, CurrentLevel},
-    shared::GameState,
+    shared::{GameState, ResetLevel},
 };
 
 use super::{light::PlayerLightInventory, movement::PlayerMovement, PlayerMarker};
@@ -13,9 +13,14 @@ use super::{light::PlayerLightInventory, movement::PlayerMovement, PlayerMarker}
 pub fn reset_player_position(
     mut q_player: Query<&mut Transform, With<PlayerMarker>>,
     mut next_game_state: ResMut<NextState<GameState>>,
+    mut ev_reset_level: EventReader<ResetLevel>,
     q_start_flag: Query<(&StartFlag, &EntityInstance)>,
     current_level: Res<CurrentLevel>,
 ) {
+    // check that we recieved a ResetLevel event asking us to Respawn
+    if !ev_reset_level.read().any(|x| *x == ResetLevel::Respawn) {
+        return;
+    }
     let Ok(mut transform) = q_player.get_single_mut() else {
         return;
     };
