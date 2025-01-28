@@ -94,6 +94,7 @@ impl LightColor {
 /// [`shoot_light`](crate::player::light::shoot_light), and simulated in
 /// [`simulate_light_sources`]
 #[derive(Component)]
+#[require(Transform, Visibility, Sprite)]
 pub struct LightRaySource {
     pub start_pos: Vec2,
     pub start_dir: Vec2,

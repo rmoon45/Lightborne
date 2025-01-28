@@ -44,6 +44,7 @@ pub fn shoot_light(
     mut commands: Commands,
     mut q_player: Query<(&Transform, &mut PlayerLightInventory), With<PlayerMarker>>,
     q_cursor: Query<&CursorWorldCoords>,
+    asset_server: Res<AssetServer>,
 ) {
     let Ok((player_transform, mut player_inventory)) = q_player.get_single_mut() else {
         return;
@@ -62,6 +63,11 @@ pub fn shoot_light(
         return;
     }
 
+    let mut source_transform = Transform::from_translation(ray_pos.extend(1.0)); //hardcode hack fix
+    source_transform.rotate_z(ray_dir.to_angle());
+    let mut source_sprite = Sprite::from_image(asset_server.load("light/compass.png"));
+    source_sprite.color = Color::srgb(2.0, 2.0, 2.0);
+
     let id = commands
         .spawn(LightRaySource {
             start_pos: ray_pos,
@@ -69,6 +75,8 @@ pub fn shoot_light(
             time_traveled: 0.0,
             color: player_inventory.current_color,
         })
+        .insert(source_sprite)
+        .insert(source_transform)
         .id();
 
     // Bevy's Mut or ResMut doesn't let you borrow multiple fields of a struct, so sometimes you

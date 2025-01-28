@@ -144,22 +144,27 @@ pub fn simulate_light_sources(
             ray_qry = ray_qry.exclude_collider(entity);
         }
 
-        for (i, pair) in pts.windows(2).enumerate() {
-            let midpoint = pair[0].midpoint(pair[1]).extend(1.0);
-            let scale = Vec3::new(pair[0].distance(pair[1]), 1., 1.);
-            let rotation = (pair[1] - pair[0]).to_angle();
-            let transform = Transform::from_translation(midpoint)
-                .with_scale(scale)
-                .with_rotation(Quat::from_rotation_z(rotation));
-
-            let Ok((mut c_transform, mut c_visibility)) =
-                q_segments.get_mut(segment_cache.table[source.color][i])
-            else {
+        for (i, segment) in segment_cache.table[source.color].iter().enumerate() {
+            let Ok((mut c_transform, mut c_visibility)) = q_segments.get_mut(*segment) else {
                 panic!("Segment did not have visibility or transform");
             };
 
-            *c_transform = transform;
-            *c_visibility = Visibility::Visible;
+            if i + 1 < pts.len() {
+                let midpoint = pts[i].midpoint(pts[i + 1]).extend(1.0);
+                let scale = Vec3::new(pts[i].distance(pts[i + 1]), 1., 1.);
+                let rotation = (pts[i + 1] - pts[i]).to_angle();
+
+                let transform = Transform::from_translation(midpoint)
+                    .with_scale(scale)
+                    .with_rotation(Quat::from_rotation_z(rotation));
+
+                *c_transform = transform;
+                *c_visibility = Visibility::Visible;
+            } else {
+                // required for white beam
+                *c_transform = Transform::default();
+                *c_visibility = Visibility::Hidden;
+            }
         }
     }
 }
@@ -192,6 +197,7 @@ pub fn cleanup_light_sources(
                 .get_mut(entity)
                 .expect("Segment should have visibility");
 
+            // required for white beam
             *transform = Transform::default();
             *visibility = Visibility::Hidden;
         }
