@@ -4,6 +4,10 @@ use bevy::{
 };
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
+use match_player::{
+    post_update_match_player_pixel, pre_update_match_player_pixel, update_match_player_z,
+};
+use strand::{add_player_hair_and_cloth, update_player_strand_offsets, update_strand};
 
 use crate::{
     input::update_cursor_world_coords,
@@ -18,8 +22,10 @@ use spawn::{add_player_sensors, init_player_bundle};
 
 mod kill;
 pub mod light;
+mod match_player;
 pub mod movement;
 mod spawn;
+mod strand;
 
 /// [`Plugin`] for anything player based.
 pub struct PlayerManagementPlugin;
@@ -64,7 +70,13 @@ impl Plugin for PlayerManagementPlugin {
             quick_reset
                 .run_if(input_just_pressed(KeyCode::KeyR))
                 .run_if(in_state(GameState::Playing)),
-        );
+        )
+        .add_systems(FixedUpdate, update_strand)
+        .add_systems(PreUpdate, pre_update_match_player_pixel)
+        .add_systems(PostUpdate, post_update_match_player_pixel)
+        .add_systems(FixedUpdate, update_match_player_z)
+        .add_systems(FixedUpdate, add_player_hair_and_cloth)
+        .add_systems(FixedUpdate, update_player_strand_offsets);
     }
 }
 
@@ -93,7 +105,7 @@ pub struct LdtkPlayerBundle {
     player_marker: PlayerMarker,
     #[with(init_player_bundle)]
     player: PlayerBundle,
-    #[sprite("lyra.png")]
+    #[sprite("lyra_bald.png")]
     sprite: Sprite,
     #[worldly]
     worldly: Worldly,
