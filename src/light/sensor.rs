@@ -89,14 +89,12 @@ pub fn reset_light_sensors(mut q_sensors: Query<&mut LightSensor>) {
 /// implementation across multiple systems to better utilize [`Event`].
 pub fn update_light_sensors(
     mut commands: Commands,
-    mut q_sensors: Query<
-        (
-            Entity,
-            &mut LightSensor,
-            &Interactable,
-            Option<&InteractableSFX>,
-        )
-    >,
+    mut q_sensors: Query<(
+        Entity,
+        &mut LightSensor,
+        &Interactable,
+        Option<&InteractableSFX>,
+    )>,
     mut ev_group_triggered: EventWriter<GroupTriggeredEvent>,
     mut ev_hit_by_light: EventReader<HitByLightEvent>,
     time: Res<Time>,
@@ -123,7 +121,7 @@ pub fn update_light_sensors(
                 ev_group_triggered.send(GroupTriggeredEvent {
                     id: interactable.id,
                 });
-                
+
                 // FIXME: this feels rather hard coded, the interactable on_triggered effect sound
                 // play should only have to be written once, in a system them handles all interactables
                 // and not only light sensors
