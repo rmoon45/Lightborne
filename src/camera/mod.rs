@@ -39,7 +39,6 @@ const CAMERA_ANIMATION_SECS: f32 = 0.4;
 /// [`Startup`] [`System`] that spawns the [`Camera2d`] in the world.
 ///
 /// Notes:
-/// - Spawns the camera with hardcoded position 160, -94
 /// - Spawns the camera with [`OrthographicProjection`] with fixed scaling at 320x180
 fn setup_camera(mut commands: Commands) {
     commands
@@ -58,7 +57,7 @@ fn setup_camera(mut commands: Commands) {
             },
             ..OrthographicProjection::default_2d()
         }))
-        .insert(Transform::from_xyz(160., -94., 0.));
+        .insert(Transform::default());
 }
 
 #[derive(Event)]

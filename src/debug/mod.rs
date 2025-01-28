@@ -1,4 +1,10 @@
-use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, prelude::*, window::PrimaryWindow};
+use bevy::{
+    diagnostic::FrameTimeDiagnosticsPlugin,
+    ecs::schedule::{LogLevel, ScheduleBuildSettings},
+    prelude::*,
+    window::PrimaryWindow,
+};
+use bevy_ecs_ldtk::LevelIid;
 use bevy_inspector_egui::{
     bevy_egui::{EguiContext, EguiPlugin},
     bevy_inspector::ui_for_entity_with_children,
@@ -6,12 +12,13 @@ use bevy_inspector_egui::{
 };
 use bevy_rapier2d::render::RapierDebugRenderPlugin;
 
-use crate::level::CurrentLevel;
+use crate::{config::Config, level::CurrentLevel};
 
 pub struct DebugPlugin {
     pub physics: bool,
     pub frame_time: bool,
     pub ui: bool,
+    pub ambiguity: bool,
 }
 
 impl Plugin for DebugPlugin {
@@ -19,7 +26,7 @@ impl Plugin for DebugPlugin {
         if self.ui {
             app.add_plugins(EguiPlugin)
                 .add_plugins(bevy_inspector_egui::DefaultInspectorConfigPlugin)
-                .add_systems(Update, debug_ui);
+                .add_systems(Last, debug_ui);
         }
 
         if self.physics {
@@ -28,12 +35,39 @@ impl Plugin for DebugPlugin {
         if self.frame_time {
             app.add_plugins(FrameTimeDiagnosticsPlugin);
         }
+        if self.ambiguity {
+            app.edit_schedule(Update, |schedule| {
+                schedule.set_build_settings(ScheduleBuildSettings {
+                    ambiguity_detection: LogLevel::Warn,
+                    ..default()
+                });
+            });
+            app.edit_schedule(PreUpdate, |schedule| {
+                schedule.set_build_settings(ScheduleBuildSettings {
+                    ambiguity_detection: LogLevel::Warn,
+                    ..default()
+                });
+            });
+            app.edit_schedule(PostUpdate, |schedule| {
+                schedule.set_build_settings(ScheduleBuildSettings {
+                    ambiguity_detection: LogLevel::Warn,
+                    ..default()
+                });
+            });
+            app.edit_schedule(FixedUpdate, |schedule| {
+                schedule.set_build_settings(ScheduleBuildSettings {
+                    ambiguity_detection: LogLevel::Warn,
+                    ..default()
+                });
+            });
+        }
     }
 }
 
 impl Default for DebugPlugin {
     fn default() -> Self {
         DebugPlugin {
+            ambiguity: false,
             physics: false,
             frame_time: true,
             ui: true,
@@ -42,6 +76,11 @@ impl Default for DebugPlugin {
 }
 
 pub fn debug_ui(world: &mut World) {
+    let config = world.resource::<Config>();
+    if !config.debug_config.ui {
+        return;
+    }
+
     let Ok(egui_context) = world
         .query_filtered::<&mut EguiContext, With<PrimaryWindow>>()
         .get_single(world)
@@ -57,6 +96,13 @@ pub fn debug_ui(world: &mut World) {
         egui::ScrollArea::vertical().show(ui, |ui| {
             ui.heading("Current Level");
             ui_for_entity_with_children(world, level_entity, ui);
+
+            ui.heading("Loaded Levels");
+            let mut query = world.query::<&LevelIid>();
+            let levels: Vec<&LevelIid> = query.iter(world).collect();
+            for level in levels {
+                ui.label(level.get());
+            }
         });
     });
 }
