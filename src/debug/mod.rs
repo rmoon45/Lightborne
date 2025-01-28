@@ -12,7 +12,7 @@ use bevy_inspector_egui::{
 };
 use bevy_rapier2d::render::RapierDebugRenderPlugin;
 
-use crate::level::CurrentLevel;
+use crate::{config::Config, level::CurrentLevel};
 
 pub struct DebugPlugin {
     pub physics: bool,
@@ -76,6 +76,11 @@ impl Default for DebugPlugin {
 }
 
 pub fn debug_ui(world: &mut World) {
+    let config = world.resource::<Config>();
+    if !config.debug_config.ui {
+        return;
+    }
+
     let Ok(egui_context) = world
         .query_filtered::<&mut EguiContext, With<PrimaryWindow>>()
         .get_single(world)

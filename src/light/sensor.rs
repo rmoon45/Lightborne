@@ -1,4 +1,4 @@
-use bevy::{prelude::*, time::Stopwatch};
+use bevy::{ecs::entity::EntityHashSet, prelude::*, time::Stopwatch};
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 use std::time::Duration;
@@ -11,12 +11,10 @@ use crate::{
     shared::GroupLabel,
 };
 
-/// [`Component`] used to mark components that have been hit by light. The current design of the
-/// system is very bad, an event like `HitByLightEvent(Entity)` should be used instead to signal
-/// the [`LightSensor`]s to activate.
-#[derive(Default, Component)]
-#[component(storage = "SparseSet")]
-pub struct HitByLight;
+/// [`Event`] used to notify other entities to trigger based on collision with light.
+/// An included [`Entity`] is used to indicate the corresponding [`LightSensor`].
+#[derive(Event)]
+pub struct HitByLightEvent(pub Entity);
 
 /// [`Component`] added to entities receptive to light. The
 /// [`activation_timer`](LightSensor::activation_timer) should be initialized in the
@@ -83,68 +81,75 @@ pub fn reset_light_sensors(mut q_sensors: Query<&mut LightSensor>) {
     }
 }
 
-/// [`System`] that queries [`LightSensor`]s for [`HitByLight`] markers added when light hits
-/// a light sensor, and immediately removes them. As mentioned in [`HitByLight`], this design
-/// pattern isn't the best, and the [`Event`]-based one should be implemented instead.
+/// [`System`] that runs on [`Update`], querying each [`LightSensor`] and updating them
+/// based on each [`HitByLightEvent`] generated in the [`System`]:
+/// [`simulate_light_sources`](crate::light::segments::simulate_light_sources). This design
+/// is still imperfect, as while it differs semantically from the previous implementation,
+/// each [`Event`] is generated every frame. Preferably, refactor to include a "yap"-free
+/// implementation across multiple systems to better utilize [`Event`].
 pub fn update_light_sensors(
     mut commands: Commands,
-    mut q_non_interactions: Query<(&mut LightSensor, &Interactable), Without<HitByLight>>,
-    mut q_interactions: Query<
-        (
-            Entity,
-            &mut LightSensor,
-            &Interactable,
-            Option<&InteractableSFX>,
-        ),
-        With<HitByLight>,
-    >,
+    mut q_sensors: Query<(
+        Entity,
+        &mut LightSensor,
+        &Interactable,
+        Option<&InteractableSFX>,
+    )>,
     mut ev_group_triggered: EventWriter<GroupTriggeredEvent>,
+    mut ev_hit_by_light: EventReader<HitByLightEvent>,
     time: Res<Time>,
 ) {
-    for (mut sensor, interactable) in q_non_interactions.iter_mut() {
-        sensor.activation_timer.tick(time.delta());
-
-        if sensor.was_hit {
-            sensor.activation_timer.reset();
-        }
-        if sensor.activation_timer.just_finished() {
-            ev_group_triggered.send(GroupTriggeredEvent {
-                id: interactable.id,
-            });
-        }
-        sensor.was_hit = false;
+    let mut hit_sensors: EntityHashSet = EntityHashSet::default();
+    for ev in ev_hit_by_light.read() {
+        hit_sensors.insert(ev.0);
     }
 
-    for (entity, mut sensor, interactable, sfx) in q_interactions.iter_mut() {
-        if sensor.activation_timer.paused() {
-            sensor.activation_timer.unpause();
-        }
+    for (entity, mut sensor, interactable, sfx) in q_sensors.iter_mut() {
+        if hit_sensors.contains(&entity) {
+            if sensor.activation_timer.paused() {
+                sensor.activation_timer.unpause();
+            }
 
-        sensor.cumulative_exposure.tick(time.delta());
-        sensor.activation_timer.tick(time.delta());
+            sensor.activation_timer.tick(time.delta());
+            sensor.cumulative_exposure.tick(time.delta());
 
-        if !sensor.was_hit {
-            sensor.activation_timer.reset();
-        }
-        if sensor.activation_timer.just_finished() {
-            ev_group_triggered.send(GroupTriggeredEvent {
-                id: interactable.id,
-            });
+            if !sensor.was_hit {
+                sensor.activation_timer.reset();
+            }
 
-            // FIXME: this feels rather hard coded, the interactable on_triggered effect sound
-            // play should only have to be written once, in a system them handles all interactables
-            // and not only light sensors
-            if let Some(sfx) = sfx {
-                if let Some(on_triggered) = &sfx.on_triggered {
-                    commands.entity(entity).insert((
-                        AudioPlayer::new(on_triggered.clone()),
-                        PlaybackSettings::REMOVE,
-                    ));
+            if sensor.activation_timer.just_finished() {
+                ev_group_triggered.send(GroupTriggeredEvent {
+                    id: interactable.id,
+                });
+
+                // FIXME: this feels rather hard coded, the interactable on_triggered effect sound
+                // play should only have to be written once, in a system them handles all interactables
+                // and not only light sensors
+                if let Some(sfx) = sfx {
+                    if let Some(on_triggered) = &sfx.on_triggered {
+                        commands.entity(entity).insert((
+                            AudioPlayer::new(on_triggered.clone()),
+                            PlaybackSettings::REMOVE,
+                        ));
+                    }
                 }
             }
-        }
-        sensor.was_hit = true;
 
-        commands.entity(entity).remove::<HitByLight>();
+            sensor.was_hit = true;
+        } else {
+            sensor.activation_timer.tick(time.delta());
+
+            if sensor.was_hit {
+                sensor.activation_timer.reset();
+            }
+
+            if sensor.activation_timer.just_finished() {
+                ev_group_triggered.send(GroupTriggeredEvent {
+                    id: interactable.id,
+                });
+            }
+
+            sensor.was_hit = false;
+        }
     }
 }
