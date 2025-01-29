@@ -72,10 +72,13 @@ impl Plugin for PlayerManagementPlugin {
                 .run_if(in_state(GameState::Playing)),
         )
         .add_systems(FixedUpdate, update_strand)
-        .add_systems(PreUpdate, pre_update_match_player_pixel)
-        .add_systems(PostUpdate, post_update_match_player_pixel)
+        .add_systems(FixedPreUpdate, pre_update_match_player_pixel)
+        .add_systems(FixedPostUpdate, post_update_match_player_pixel)
         .add_systems(FixedUpdate, update_match_player_z)
-        .add_systems(FixedUpdate, add_player_hair_and_cloth)
+        .add_systems(
+            PreUpdate,
+            add_player_hair_and_cloth.in_set(LevelSystems::Processing),
+        )
         .add_systems(FixedUpdate, update_player_strand_offsets);
     }
 }
