@@ -3,7 +3,7 @@ use bevy::{
     prelude::*,
 };
 use bevy_ecs_ldtk::prelude::*;
-use bevy_rapier2d::{plugin::RapierContext, prelude::*};
+use bevy_rapier2d::prelude::*;
 use match_player::{
     post_update_match_player_pixel, pre_update_match_player_pixel, update_match_player_z,
 };
