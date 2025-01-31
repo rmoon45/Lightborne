@@ -10,10 +10,11 @@ use crystal::CrystalPlugin;
 use misc::{init_start_marker, process_buttons, ButtonBundle, StartFlagBundle};
 use setup::LevelSetupPlugin;
 use walls::{spawn_wall_collision, WallBundle};
+use entity::SpikeBundle;
 
 pub mod activatable;
 mod crystal;
-mod entity;
+pub mod entity;
 pub mod interactable;
 pub mod misc;
 mod setup;
@@ -39,6 +40,7 @@ impl Plugin for LevelManagementPlugin {
             .register_ldtk_entity::<ButtonBundle>("Button")
             .register_ldtk_entity::<StartFlagBundle>("Start")
             .register_ldtk_int_cell::<WallBundle>(1)
+            .register_ldtk_int_cell::<SpikeBundle>(2)
             .add_systems(
                 PreUpdate,
                 (spawn_wall_collision, init_start_marker, process_buttons)

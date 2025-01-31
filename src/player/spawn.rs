@@ -6,11 +6,18 @@ use crate::shared::GroupLabel;
 
 use super::{light::PlayerLightInventory, movement::PlayerMovement, PlayerBundle, PlayerMarker};
 
+/// Attached to player hitbox
+#[derive(Default, Component)]
+pub struct PlayerHurtMarker;
+
 /// Used by Ldtk to spawn the player correctly with all of the correct [`Component`]s.
 pub fn init_player_bundle(_: &EntityInstance) -> PlayerBundle {
     PlayerBundle {
         body: RigidBody::KinematicPositionBased,
         controller: KinematicCharacterController {
+            filter_groups: Some(
+                CollisionGroups::new(GroupLabel::PLAYER_COLLIDER, GroupLabel::TERRAIN)
+            ),
             offset: CharacterLength::Absolute(1.0),
             ..default()
         },
@@ -40,9 +47,12 @@ pub fn add_player_sensors(mut commands: Commands, q_player: Query<Entity, Added<
         parent
             .spawn(Collider::cuboid(5.0, 6.0))
             .insert(Sensor)
+            .insert(RigidBody::Dynamic)
+            .insert(GravityScale(0.0))
+            .insert(PlayerHurtMarker)
             .insert(CollisionGroups::new(
                 GroupLabel::PLAYER_SENSOR,
-                GroupLabel::HURT_BOX,
+                GroupLabel::HURT_BOX | GroupLabel::TERRAIN,
             ))
             .insert(PointLight {
                 intensity: 100_000.0,

@@ -3,7 +3,7 @@ use bevy::{
     prelude::*,
 };
 use bevy_ecs_ldtk::prelude::*;
-use bevy_rapier2d::prelude::*;
+use bevy_rapier2d::{plugin::RapierContext, prelude::*};
 use match_player::{
     post_update_match_player_pixel, pre_update_match_player_pixel, update_match_player_z,
 };
@@ -13,12 +13,13 @@ use crate::{
     input::update_cursor_world_coords,
     level::LevelSystems,
     shared::{GameState, ResetLevel},
+    level::entity::{Spike, HurtMarker},
 };
 
 use kill::{reset_player_on_level_switch, reset_player_position};
 use light::{handle_color_switch, preview_light_path, shoot_light, PlayerLightInventory};
 use movement::{move_player, queue_jump, PlayerMovement};
-use spawn::{add_player_sensors, init_player_bundle};
+use spawn::{add_player_sensors, init_player_bundle, PlayerHurtMarker};
 
 mod kill;
 pub mod light;
@@ -71,6 +72,7 @@ impl Plugin for PlayerManagementPlugin {
                 .run_if(input_just_pressed(KeyCode::KeyR))
                 .run_if(in_state(GameState::Playing)),
         )
+        .add_systems(Update, kill_player_hurt)
         .add_systems(FixedUpdate, update_strand)
         .add_systems(PreUpdate, pre_update_match_player_pixel)
         .add_systems(PostUpdate, post_update_match_player_pixel)
@@ -116,4 +118,23 @@ pub struct LdtkPlayerBundle {
 /// [`System`] that will cause a state switch to [`GameState::Respawning`] when the "R" key is pressed.
 fn quick_reset(mut ev_reset_level: EventWriter<ResetLevel>) {
     ev_reset_level.send(ResetLevel::Respawn);
+}
+
+/// Kills player upon touching a HURT_BOX
+fn kill_player_hurt(
+    rapier_context: Query<&RapierContext>,
+    q_player: Query<Entity, With<PlayerHurtMarker>>,
+    mut q_hurt: Query<(&mut Spike, Entity), With<HurtMarker>>,
+    mut ev_reset_level: EventWriter<ResetLevel>,
+) {
+    let rapier = rapier_context.single();
+    for player in q_player.iter() {
+        for (mut spike, hurt) in q_hurt.iter_mut() {
+            if rapier.intersection_pair(player, hurt) == Some(true) {
+                spike.add_death();
+                ev_reset_level.send(ResetLevel::Respawn);
+                return;
+            }
+        }
+    }
 }

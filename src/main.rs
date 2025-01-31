@@ -47,6 +47,7 @@ fn main() {
         .add_plugins(LevelManagementPlugin)
         .add_plugins(LightManagementPlugin)
         .add_plugins(PausePlugin)
+        .add_plugins(RapierDebugRenderPlugin::default()) //debugger
         .add_plugins(CameraPlugin)
         .add_plugins(DebugPlugin::default())
         .insert_state(GameState::Playing)
