@@ -7,10 +7,10 @@ use crate::{
 };
 use activatable::ActivatablePlugin;
 use crystal::CrystalPlugin;
+use entity::SpikeBundle;
 use misc::{init_start_marker, process_buttons, ButtonBundle, StartFlagBundle};
 use setup::LevelSetupPlugin;
 use walls::{spawn_wall_collision, WallBundle};
-use entity::SpikeBundle;
 
 pub mod activatable;
 mod crystal;
@@ -30,12 +30,6 @@ impl Plugin for LevelManagementPlugin {
             .add_plugins(ActivatablePlugin)
             .add_plugins(CrystalPlugin)
             .init_resource::<CurrentLevel>()
-            .insert_resource(LdtkSettings {
-                level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation {
-                    load_level_neighbors: true,
-                },
-                ..default()
-            })
             .register_ldtk_entity::<LdtkPlayerBundle>("Lyra")
             .register_ldtk_entity::<ButtonBundle>("Button")
             .register_ldtk_entity::<StartFlagBundle>("Start")
