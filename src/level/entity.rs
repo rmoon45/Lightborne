@@ -11,7 +11,7 @@ pub struct HurtMarker;
 /// Component for spikes
 #[derive(Default, Component)]
 pub struct Spike {
-    name: String,
+    // name: String,
     num_deaths: u32,
 }
 
@@ -24,13 +24,13 @@ impl Spike {
 
 /// IntGrid implementation of Spike
 impl From<IntGridCell> for Spike {
-    fn from (cell_instance: IntGridCell) -> Self {
+    fn from(cell_instance: IntGridCell) -> Self {
         match cell_instance.value {
             2 => Spike {
-                name: "baseSpike".to_string(),
+                // name: "baseSpike".to_string(),
                 num_deaths: 0,
             },
-            _=> unreachable!(),
+            _ => unreachable!(),
         }
     }
 }
@@ -79,9 +79,9 @@ impl From<IntGridCell> for FixedEntityBundle {
         match cell_instance.value {
             2 => FixedEntityBundle {
                 collider: Collider::triangle(
-                    Vec2::new(-4., -4.), 
-                    Vec2::new(4., -4.), 
-                    Vec2::new(0., 4.)
+                    Vec2::new(-4., -4.),
+                    Vec2::new(4., -4.),
+                    Vec2::new(0., 4.),
                 ),
                 rigid_body: RigidBody::Fixed,
                 collision_groups: CollisionGroups::new(
@@ -89,7 +89,8 @@ impl From<IntGridCell> for FixedEntityBundle {
                     GroupLabel::LIGHT_RAY | GroupLabel::PLAYER_SENSOR | GroupLabel::WHITE_RAY,
                 ),
             },
-            _=> unreachable!(),
+            _ => unreachable!(),
         }
     }
 }
+
