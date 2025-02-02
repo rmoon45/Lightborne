@@ -65,7 +65,10 @@ impl From<&EntityInstance> for FixedEntityBundle {
                 rigid_body: RigidBody::Fixed,
                 collision_groups: CollisionGroups::new(
                     GroupLabel::TERRAIN,
-                    GroupLabel::LIGHT_RAY | GroupLabel::PLAYER_COLLIDER | GroupLabel::WHITE_RAY,
+                    GroupLabel::LIGHT_RAY
+                        | GroupLabel::PLAYER_COLLIDER
+                        | GroupLabel::WHITE_RAY
+                        | GroupLabel::STRAND,
                 ),
             },
             _ => unreachable!(),
@@ -86,11 +89,13 @@ impl From<IntGridCell> for FixedEntityBundle {
                 rigid_body: RigidBody::Fixed,
                 collision_groups: CollisionGroups::new(
                     GroupLabel::TERRAIN,
-                    GroupLabel::LIGHT_RAY | GroupLabel::PLAYER_SENSOR | GroupLabel::WHITE_RAY,
+                    GroupLabel::LIGHT_RAY
+                        | GroupLabel::PLAYER_SENSOR
+                        | GroupLabel::WHITE_RAY
+                        | GroupLabel::STRAND,
                 ),
             },
             _ => unreachable!(),
         }
     }
 }
-
