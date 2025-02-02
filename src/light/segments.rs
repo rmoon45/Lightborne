@@ -74,6 +74,20 @@ impl FromWorld for LightSegmentCache {
     }
 }
 
+/// Local variable for [`simulate_light_sources`] used to store the handle to the audio SFX
+pub struct LightBounceSfx([Handle<AudioSource>; 3]);
+
+impl FromWorld for LightBounceSfx {
+    fn from_world(world: &mut World) -> Self {
+        let asset_server = world.resource::<AssetServer>();
+        LightBounceSfx([
+            asset_server.load("sfx/light/light-bounce-1.wav"),
+            asset_server.load("sfx/light/light-bounce-2.wav"),
+            asset_server.load("sfx/light/light-bounce-3.wav"),
+        ])
+    }
+}
+
 /// [`System`] that runs on [`Update`], calculating the [`Transform`] of light segments from the
 /// corresponding [`LightRaySource`]. Note that this calculation happens every frame, so instead of
 /// rapidly spawning/despawning the entities, we spawn them and cache them in the
@@ -85,18 +99,20 @@ impl FromWorld for LightSegmentCache {
 /// Similar logic is duplicated in [`preview_light_path`](crate::player::light::preview_light_path),
 /// these two systems should be merged.
 pub fn simulate_light_sources(
-    q_light_sources: Query<&LightRaySource>,
+    mut commands: Commands,
+    mut q_light_sources: Query<&mut LightRaySource>,
     mut q_rapier: Query<&mut RapierContext>,
     mut ev_hit_by_light: EventWriter<HitByLightEvent>,
     q_light_sensor: Query<&LightSensor>,
     mut q_segments: Query<(&mut Transform, &mut Visibility), With<LightSegmentMarker>>,
     segment_cache: Res<LightSegmentCache>,
+    light_bounce_sfx: Local<LightBounceSfx>,
 ) {
     let Ok(rapier_context) = q_rapier.get_single_mut() else {
         return;
     };
 
-    for source in q_light_sources.iter() {
+    for mut source in q_light_sources.iter_mut() {
         let mut ray_pos = source.start_pos;
         let mut ray_dir = source.start_dir;
         let collision_groups = match source.color {
@@ -114,6 +130,7 @@ pub fn simulate_light_sources(
 
         let mut pts: Vec<Vec2> = vec![ray_pos];
         let mut remaining_time = source.time_traveled;
+        let mut bounces = 0;
         for _ in 0..source.color.num_bounces() + 1 {
             let Some((entity, intersection)) = rapier_context.cast_ray_and_get_normal(
                 ray_pos,
@@ -134,6 +151,16 @@ pub fn simulate_light_sources(
             remaining_time -= intersection.time_of_impact;
 
             pts.push(intersection.point);
+
+            bounces += 1;
+            if bounces > source.num_bounces {
+                source.num_bounces = bounces;
+                // Add sound effects as child because this current entity could have been hit again
+                commands.entity(entity).with_child((
+                    AudioPlayer::new(light_bounce_sfx.0[bounces - 1].clone()),
+                    PlaybackSettings::DESPAWN,
+                ));
+            }
 
             if q_light_sensor.contains(entity) {
                 ev_hit_by_light.send(HitByLightEvent(entity));

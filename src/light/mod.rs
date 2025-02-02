@@ -17,7 +17,7 @@ pub mod segments;
 pub mod sensor;
 
 /// The speed of the light beam in units per [`FixedUpdate`].
-const LIGHT_SPEED: f32 = 10.0;
+const LIGHT_SPEED: f32 = 8.0;
 
 /// The width of the rectangle used to represent [`LightSegment`](segments::LightSegmentBundle)s.
 const LIGHT_SEGMENT_THICKNESS: f32 = 3.0;
@@ -100,4 +100,5 @@ pub struct LightRaySource {
     pub start_dir: Vec2,
     pub time_traveled: f32,
     pub color: LightColor,
+    pub num_bounces: usize,
 }

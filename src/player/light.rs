@@ -75,6 +75,7 @@ pub fn shoot_light(
             start_pos: ray_pos,
             start_dir: ray_dir,
             time_traveled: 0.0,
+            num_bounces: 0,
             color: player_inventory.current_color,
         })
         .insert(source_sprite)
