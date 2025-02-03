@@ -49,7 +49,7 @@ fn setup_camera(mut commands: Commands) {
             ..default()
         })
         .insert(Tonemapping::TonyMcMapface)
-        .insert(Bloom::default())
+        // .insert(Bloom::default())
         .insert(Projection::Orthographic(OrthographicProjection {
             scaling_mode: ScalingMode::Fixed {
                 width: CAMERA_WIDTH,
