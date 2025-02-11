@@ -4,7 +4,7 @@ use bevy::{
     core_pipeline::{bloom::Bloom, tonemapping::Tonemapping},
     ecs::system::SystemId,
     prelude::*,
-    render::camera::ScalingMode,
+    render::{camera::ScalingMode, view::RenderLayers},
 };
 use bevy_rapier2d::plugin::PhysicsSet;
 
@@ -23,7 +23,7 @@ impl Plugin for CameraPlugin {
     }
 }
 
-/// Marker [`Component`] used to query for the main (and currently only) camera in the world.
+/// Marker [`Component`] used to query for the main camera in the world.
 ///
 /// Your query might look like this:
 /// ```rust
@@ -31,6 +31,11 @@ impl Plugin for CameraPlugin {
 /// ```
 #[derive(Component, Default)]
 pub struct MainCamera;
+
+/// Marker [`Component`] used to query for the background camera. Note that for an entity to be
+/// rendered on this Camera, it must be given the `RenderLayers::layer(1)` component.
+#[derive(Component, Default)]
+pub struct BackgroundCamera;
 
 const CAMERA_WIDTH: f32 = 320.;
 const CAMERA_HEIGHT: f32 = 180.;
@@ -41,23 +46,40 @@ const CAMERA_ANIMATION_SECS: f32 = 0.4;
 /// Notes:
 /// - Spawns the camera with [`OrthographicProjection`] with fixed scaling at 320x180
 fn setup_camera(mut commands: Commands) {
-    commands
-        .spawn(Camera2d)
-        .insert(MainCamera)
-        .insert(Camera {
+    let projection = Projection::Orthographic(OrthographicProjection {
+        scaling_mode: ScalingMode::Fixed {
+            width: CAMERA_WIDTH,
+            height: CAMERA_HEIGHT,
+        },
+        ..OrthographicProjection::default_2d()
+    });
+    commands.spawn((
+        Camera2d,
+        MainCamera,
+        Camera {
             hdr: true,
+            order: 1,
+            clear_color: ClearColorConfig::None,
             ..default()
-        })
-        .insert(Tonemapping::TonyMcMapface)
-        .insert(Bloom::default())
-        .insert(Projection::Orthographic(OrthographicProjection {
-            scaling_mode: ScalingMode::Fixed {
-                width: CAMERA_WIDTH,
-                height: CAMERA_HEIGHT,
-            },
-            ..OrthographicProjection::default_2d()
-        }))
-        .insert(Transform::default());
+        },
+        Tonemapping::TonyMcMapface,
+        Bloom::default(),
+        projection.clone(),
+        Transform::default(),
+    ));
+
+    commands.spawn((
+        Camera2d,
+        BackgroundCamera,
+        Camera {
+            hdr: true, // If Cameras mix HDR and non-HDR, then weird ass stuff happens. Seems like
+            // https://github.com/bevyengine/bevy/pull/13419 was only a partial fix
+            ..default()
+        },
+        projection,
+        RenderLayers::layer(1),
+        Transform::default(),
+    ));
 }
 
 #[derive(Event)]

@@ -28,7 +28,7 @@ fn spawn_pause(mut commands: Commands, asset_server: Res<AssetServer>) {
                 justify_content: JustifyContent::Center,
                 ..default()
             },
-            BackgroundColor(Color::linear_rgba(0., 0., 0., 0.0)),
+            BackgroundColor(Color::linear_rgba(0., 0., 0., 0.7)),
             PauseMarker,
         ))
         .with_child((
