@@ -71,8 +71,11 @@ impl Plugin for PlayerManagementPlugin {
                 .run_if(input_just_pressed(KeyCode::KeyR))
                 .run_if(in_state(GameState::Playing)),
         )
-        .add_systems(Update, kill_player_on_spike)
-        .add_systems(FixedUpdate, update_strand)
+        .add_systems(
+            Update,
+            kill_player_on_spike.in_set(LevelSystems::Simulation),
+        )
+        .add_systems(FixedUpdate, update_strand.in_set(LevelSystems::Simulation))
         .add_systems(FixedPreUpdate, pre_update_match_player_pixel)
         .add_systems(FixedPostUpdate, post_update_match_player_pixel)
         .add_systems(FixedUpdate, update_match_player_z)
@@ -80,7 +83,10 @@ impl Plugin for PlayerManagementPlugin {
             PreUpdate,
             add_player_hair_and_cloth.in_set(LevelSystems::Processing),
         )
-        .add_systems(FixedUpdate, update_player_strand_offsets);
+        .add_systems(
+            FixedUpdate,
+            update_player_strand_offsets.in_set(LevelSystems::Simulation),
+        );
     }
 }
 

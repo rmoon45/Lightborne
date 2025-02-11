@@ -18,7 +18,7 @@ impl Plugin for PausePlugin {
 #[derive(Component)]
 pub struct PauseMarker;
 
-fn spawn_pause(mut commands: Commands) {
+fn spawn_pause(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn((
             Node {
@@ -32,8 +32,8 @@ fn spawn_pause(mut commands: Commands) {
             PauseMarker,
         ))
         .with_child((
-            Text::new("Paused"),
-            TextColor(Color::linear_rgb(1.0, 1.0, 1.0)),
+            ImageNode::from(asset_server.load("ui/pause_menu.png")),
+            Transform::from_scale(Vec3::new(5.0, 5.0, 1.0)),
         ));
 }
 
