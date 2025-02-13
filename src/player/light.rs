@@ -31,7 +31,11 @@ pub fn spawn_angle_indicator(
     };
 
     commands.entity(player).with_child((
-        Sprite::from_image(asset_server.load("angle.png")),
+        Sprite {
+            image: asset_server.load("angle.png"),
+            color: Color::srgba(1.0, 1.0, 1.0, 0.1),
+            ..default()
+        },
         AngleMarker,
     ));
 }
