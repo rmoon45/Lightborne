@@ -17,6 +17,7 @@ pub struct CrystalPlugin;
 impl Plugin for CrystalPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CrystalToggleEvent>()
+            .add_systems(Update, process_crystals.in_set(LevelSystems::Processing))
             .add_systems(Update, on_crystal_changed.in_set(LevelSystems::Simulation))
             .add_systems(FixedUpdate, reset_crystals.run_if(on_event::<ResetLevel>));
 
@@ -64,12 +65,19 @@ impl From<IntGridCell> for Crystal {
 pub struct CrystalBundle {
     #[from_int_grid_cell]
     crystal: Crystal,
-    #[with(init_crystal_collider)]
-    collider: Collider,
+    #[from_int_grid_cell]
+    cell: IntGridCell,
 }
 
-fn init_crystal_collider(_: IntGridCell) -> Collider {
-    Collider::cuboid(4.0, 4.0)
+fn process_crystals(
+    mut commands: Commands,
+    q_crystals: Query<(Entity, &IntGridCell), Added<Crystal>>,
+) {
+    for (entity, cell) in q_crystals.iter() {
+        if is_crystal_active(cell.value) {
+            commands.entity(entity).insert(Collider::cuboid(4.0, 4.0));
+        }
+    }
 }
 
 /// The horizontal offset between active crystals and inactive crystals in the crystal tilemap
@@ -106,10 +114,13 @@ pub fn reset_crystals(
     mut q_crystals: Query<(Entity, &mut Crystal, &mut TileTextureIndex)>,
 ) {
     for (entity, mut crystal, mut index) in q_crystals.iter_mut() {
-        if crystal.init_active && crystal.active != crystal.init_active {
+        if crystal.active == crystal.init_active {
+            continue;
+        }
+        if crystal.init_active {
             activate_crystal(&mut commands, entity, &mut index);
             crystal.active = true;
-        } else if crystal.active != crystal.init_active {
+        } else {
             deactivate_crystal(&mut commands, entity, &mut index);
             crystal.active = false;
         }
