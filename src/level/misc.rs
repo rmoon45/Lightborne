@@ -3,32 +3,19 @@ use bevy_ecs_ldtk::prelude::*;
 
 use crate::light::sensor::LightSensorBundle;
 
-use super::interactable::InteractableSFX;
-
 /// [`Component`] to mark buttons in the level.
 #[derive(Default, Component)]
 pub struct ButtonMarker;
 
 /// [`Bundle`] registered with Ldtk to spawn buttons.
-#[derive(Default, Bundle, LdtkEntity)]
+#[derive(Bundle, LdtkEntity)]
 pub struct ButtonBundle {
+    #[default]
     marker: ButtonMarker,
-    #[sprite_sheet]
+    #[sprite]
     sprite_sheet: Sprite,
     #[from_entity_instance]
     light_sensor: LightSensorBundle,
-}
-
-pub fn process_buttons(
-    mut commands: Commands,
-    q_button: Query<Entity, Added<ButtonMarker>>,
-    asset_server: Res<AssetServer>,
-) {
-    for button in q_button.iter() {
-        commands.entity(button).insert(InteractableSFX {
-            on_triggered: Some(asset_server.load("sfx/button.wav")),
-        });
-    }
 }
 
 /// [`Component`] to mark start flags in the level. Used to query for when start flags are loaded

@@ -5,17 +5,14 @@ use crate::{
     player::{LdtkPlayerBundle, PlayerMarker},
     shared::{GameState, ResetLevel},
 };
-use activatable::ActivatablePlugin;
 use crystal::CrystalPlugin;
 use entity::SpikeBundle;
-use misc::{init_start_marker, process_buttons, ButtonBundle, StartFlagBundle};
+use misc::{init_start_marker, ButtonBundle, StartFlagBundle};
 use setup::LevelSetupPlugin;
 use walls::{spawn_wall_collision, WallBundle};
 
-pub mod activatable;
-mod crystal;
+pub mod crystal;
 pub mod entity;
-pub mod interactable;
 pub mod misc;
 mod setup;
 mod walls;
@@ -27,7 +24,6 @@ impl Plugin for LevelManagementPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(LdtkPlugin)
             .add_plugins(LevelSetupPlugin)
-            .add_plugins(ActivatablePlugin)
             .add_plugins(CrystalPlugin)
             .init_resource::<CurrentLevel>()
             .register_ldtk_entity::<LdtkPlayerBundle>("Lyra")
@@ -37,8 +33,7 @@ impl Plugin for LevelManagementPlugin {
             .register_ldtk_int_cell::<SpikeBundle>(2)
             .add_systems(
                 PreUpdate,
-                (spawn_wall_collision, init_start_marker, process_buttons)
-                    .in_set(LevelSystems::Processing),
+                (spawn_wall_collision, init_start_marker).in_set(LevelSystems::Processing),
             )
             .add_systems(Startup, spawn_background)
             .add_systems(Update, switch_level)
