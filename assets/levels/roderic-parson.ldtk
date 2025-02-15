@@ -9750,6 +9750,22 @@
 							],
 							"__worldX": 968,
 							"__worldY": 272
+						},
+						{
+							"__identifier": "Start",
+							"__grid": [37,20],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": { "tilesetUid": 105, "x": 256, "y": 144, "w": 16, "h": 16 },
+							"__smartColor": "#3E8948",
+							"iid": "d9cdef30-e920-11ef-b9d8-b54ff132d702",
+							"width": 8,
+							"height": 8,
+							"defUid": 185,
+							"px": [296,160],
+							"fieldInstances": [],
+							"__worldX": 1256,
+							"__worldY": 344
 						}
 					]
 				},
