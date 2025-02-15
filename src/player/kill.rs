@@ -39,7 +39,8 @@ pub fn reset_player_position(
             transform.translation.x =
                 instance.world_x.expect("Lightborne uses Free world layout") as f32;
             transform.translation.y =
-                -instance.world_y.expect("Lightborne uses Free world layout") as f32;
+                -instance.world_y.expect("Lightborne uses Free world layout") as f32 + 3.0;
+            // add small height so Lyra is not stuck into the floor
             return;
         }
     }
