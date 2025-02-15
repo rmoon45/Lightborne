@@ -3,7 +3,10 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 use std::time::Duration;
 
-use crate::{level::crystal::CrystalToggleEvent, shared::GroupLabel};
+use crate::{
+    level::crystal::{CrystalColor, CrystalToggleEvent},
+    shared::GroupLabel,
+};
 
 use super::LightColor;
 
@@ -24,11 +27,11 @@ pub struct LightSensor {
     /// Whether or not the sensor was hit the previous frame
     pub was_hit: bool,
     /// The color of the crystals to toggle
-    pub toggle_color: LightColor,
+    pub toggle_color: CrystalColor,
 }
 
 impl LightSensor {
-    fn new(toggle_color: LightColor) -> Self {
+    fn new(toggle_color: CrystalColor) -> Self {
         let mut timer = Timer::new(Duration::from_millis(300), TimerMode::Once);
         timer.pause();
         LightSensor {
@@ -53,20 +56,31 @@ pub struct LightSensorBundle {
 impl From<&EntityInstance> for LightSensorBundle {
     fn from(entity_instance: &EntityInstance) -> Self {
         match entity_instance.identifier.as_ref() {
-            "Button" => Self {
-                collider: Collider::cuboid(4., 4.),
-                sensor: Sensor,
-                collision_groups: CollisionGroups::new(
-                    GroupLabel::LIGHT_SENSOR,
-                    GroupLabel::LIGHT_RAY | GroupLabel::WHITE_RAY,
-                ),
-                light_sensor: LightSensor::new(
-                    entity_instance
-                        .get_enum_field("light_color")
-                        .expect("light_color needs to be an enum field on all buttons")
-                        .into(),
-                ),
-            },
+            "Button" => {
+                let light_color: LightColor = entity_instance
+                    .get_enum_field("light_color")
+                    .expect("light_color needs to be an enum field on all buttons")
+                    .into();
+
+                let id = entity_instance
+                    .get_int_field("id")
+                    .expect("id needs to be an int field on all buttons");
+
+                let sensor_color = CrystalColor {
+                    color: light_color,
+                    id: *id,
+                };
+
+                return Self {
+                    collider: Collider::cuboid(4., 4.),
+                    sensor: Sensor,
+                    collision_groups: CollisionGroups::new(
+                        GroupLabel::LIGHT_SENSOR,
+                        GroupLabel::LIGHT_RAY | GroupLabel::WHITE_RAY,
+                    ),
+                    light_sensor: LightSensor::new(sensor_color),
+                };
+            }
             _ => unreachable!(),
         }
     }
@@ -119,7 +133,9 @@ pub fn update_light_sensors(
         sensor.activation_timer.tick(time.delta());
 
         if sensor.activation_timer.just_finished() {
-            ev_crystal_toggle.send(CrystalToggleEvent(sensor.toggle_color));
+            ev_crystal_toggle.send(CrystalToggleEvent {
+                color: sensor.toggle_color,
+            });
 
             commands.entity(entity).with_child((
                 AudioPlayer::new(asset_server.load("sfx/button.wav")),

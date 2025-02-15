@@ -12,7 +12,7 @@ pub struct ButtonMarker;
 pub struct ButtonBundle {
     #[default]
     marker: ButtonMarker,
-    #[sprite]
+    #[sprite_sheet]
     sprite_sheet: Sprite,
     #[from_entity_instance]
     light_sensor: LightSensorBundle,
@@ -28,7 +28,7 @@ pub struct StartMarker;
 #[derive(Default, Component)]
 pub struct StartFlag {
     /// The `level_iid` of the `StartFlag`'s level.
-    pub level_iid: String,
+    pub level_iid: LevelIid,
 }
 
 /// [`Bundle`] spawned in by Ldtk corresponding to start flags.
@@ -59,7 +59,7 @@ pub fn init_start_marker(
             continue;
         };
         commands.entity(entity).insert(StartFlag {
-            level_iid: level_iid.to_string(),
+            level_iid: level_iid.clone(),
         });
     }
 }

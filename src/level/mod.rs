@@ -29,8 +29,8 @@ impl Plugin for LevelManagementPlugin {
             .register_ldtk_entity::<LdtkPlayerBundle>("Lyra")
             .register_ldtk_entity::<ButtonBundle>("Button")
             .register_ldtk_entity::<StartFlagBundle>("Start")
-            .register_ldtk_int_cell::<WallBundle>(1)
-            .register_ldtk_int_cell::<SpikeBundle>(2)
+            .register_ldtk_int_cell_for_layer::<WallBundle>("Terrain", 1)
+            .register_ldtk_int_cell_for_layer::<SpikeBundle>("Terrain", 2)
             .add_systems(
                 PreUpdate,
                 (spawn_wall_collision, init_start_marker).in_set(LevelSystems::Processing),
@@ -55,7 +55,7 @@ impl Plugin for LevelManagementPlugin {
 /// [`Resource`] that holds the `level_iid` of the current level.
 #[derive(Default, Resource)]
 pub struct CurrentLevel {
-    pub level_iid: String,
+    pub level_iid: LevelIid,
     pub level_entity: Option<Entity>,
     pub world_box: Rect,
 }
@@ -117,13 +117,13 @@ fn switch_level(
         );
 
         if world_box.contains(transform.translation.xy()) {
-            if current_level.level_iid != level_iid.as_str() {
-                if !current_level.level_iid.is_empty() {
+            if current_level.level_iid != *level_iid {
+                if !current_level.level_iid.get().is_empty() {
                     ev_reset_level.send(ResetLevel::Switching);
                 }
 
                 *current_level = CurrentLevel {
-                    level_iid: level_iid.to_string(),
+                    level_iid: level_iid.clone(),
                     level_entity: Some(entity),
                     world_box,
                 };

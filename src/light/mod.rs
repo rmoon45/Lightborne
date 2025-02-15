@@ -3,7 +3,6 @@ use bevy::{
     sprite::{AlphaMode2d, Material2dPlugin},
 };
 
-use bevy_ecs_ldtk::IntGridCell;
 use enum_map::Enum;
 use render::{LightMaterial, LightRenderData};
 use segments::{
@@ -81,21 +80,12 @@ impl From<LightColor> for LightMaterial {
     }
 }
 
-impl From<IntGridCell> for LightColor {
-    fn from(value: IntGridCell) -> Self {
-        match value.value {
-            3 | 4 => LightColor::Red,
-            5 | 6 => LightColor::Green,
-            _ => panic!("Cell value does not correspond to crystal!"),
-        }
-    }
-}
-
 impl From<&String> for LightColor {
     fn from(value: &String) -> Self {
         match value.as_str() {
             "Red" => LightColor::Red,
             "Green" => LightColor::Green,
+            "White" => LightColor::White,
             _ => panic!("String {} does not represent Light Color", value),
         }
     }
