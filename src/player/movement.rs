@@ -40,6 +40,30 @@ pub fn queue_jump(mut q_player: Query<&mut PlayerMovement, With<PlayerMarker>>) 
     player.should_jump_ticks_remaining = SHOULD_JUMP_TICKS;
 }
 
+/// [`System`] that is run on [`Update`] to crouch player
+pub fn crouch_player(
+    // query transform
+    mut q_player: Query<(&mut PlayerMovement, &mut Transform), With<PlayerMarker>>,
+    //ButtonInput<KeyCode> resource (access resource)
+    keys: Res<ButtonInput<KeyCode>>,
+) {
+    // ensure only 1 candidate to match query; let Ok = pattern matching
+    let Ok((mut _player, mut transform)) = q_player.get_single_mut() else {
+        return;
+    };
+
+    if keys.just_pressed(KeyCode::KeyS) {
+        // decrease size by half
+        transform.scale.y *= 0.5;
+        transform.translation.y -= 5.0;
+    }
+    if keys.just_released(KeyCode::KeyS) {
+        transform.scale.y *= 2.0;
+        transform.translation.y += 5.0;
+    }
+
+}
+
 /// [`System`] that is run on [`Update`] to move the player around.
 pub fn move_player(
     mut q_player: Query<
