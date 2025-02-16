@@ -67,14 +67,18 @@ pub fn kill_player_on_spike(
     mut q_hurt: Query<(&mut Spike, Entity), With<HurtMarker>>,
     mut ev_reset_level: EventWriter<ResetLevel>,
 ) {
-    let rapier = rapier_context.single();
-    for player in q_player.iter() {
-        for (mut spike, hurt) in q_hurt.iter_mut() {
-            if rapier.intersection_pair(player, hurt) == Some(true) {
-                spike.add_death();
-                ev_reset_level.send(ResetLevel::Respawn);
-                return;
-            }
+    let Ok(rapier) = rapier_context.get_single() else {
+        return;
+    };
+    let Ok(player) = q_player.get_single() else {
+        return;
+    };
+
+    for (mut spike, hurt) in q_hurt.iter_mut() {
+        if rapier.intersection_pair(player, hurt) == Some(true) {
+            spike.add_death();
+            ev_reset_level.send(ResetLevel::Respawn);
+            return;
         }
     }
 }
