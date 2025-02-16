@@ -22,7 +22,7 @@ use spawn::{add_player_sensors, init_player_bundle, PlayerHurtMarker};
 
 mod kill;
 pub mod light;
-mod match_player;
+pub mod match_player;
 pub mod movement;
 mod spawn;
 mod strand;
