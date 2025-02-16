@@ -1,12 +1,19 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
+use bevy_rapier2d::prelude::*;
 
 use crate::{
-    level::{misc::StartFlag, CurrentLevel},
+    level::{
+        entity::{HurtMarker, Spike},
+        misc::StartFlag,
+        CurrentLevel,
+    },
     shared::{GameState, ResetLevel},
 };
 
-use super::{light::PlayerLightInventory, movement::PlayerMovement, PlayerMarker};
+use super::{
+    light::PlayerLightInventory, movement::PlayerMovement, PlayerHurtMarker, PlayerMarker,
+};
 
 /// [`System`] that runs on [`GameState::Respawning`]. Will turn the state back into playing
 /// immediately.
@@ -32,7 +39,8 @@ pub fn reset_player_position(
             transform.translation.x =
                 instance.world_x.expect("Lightborne uses Free world layout") as f32;
             transform.translation.y =
-                -instance.world_y.expect("Lightborne uses Free world layout") as f32;
+                -instance.world_y.expect("Lightborne uses Free world layout") as f32 + 3.0;
+            // add small height so Lyra is not stuck into the floor
             return;
         }
     }
@@ -50,4 +58,27 @@ pub fn reset_player_on_level_switch(
 
     *movement = PlayerMovement::default();
     *inventory = PlayerLightInventory::default();
+}
+
+/// Kills player upon touching a HURT_BOX
+pub fn kill_player_on_spike(
+    rapier_context: Query<&RapierContext>,
+    q_player: Query<Entity, With<PlayerHurtMarker>>,
+    mut q_hurt: Query<(&mut Spike, Entity), With<HurtMarker>>,
+    mut ev_reset_level: EventWriter<ResetLevel>,
+) {
+    let Ok(rapier) = rapier_context.get_single() else {
+        return;
+    };
+    let Ok(player) = q_player.get_single() else {
+        return;
+    };
+
+    for (mut spike, hurt) in q_hurt.iter_mut() {
+        if rapier.intersection_pair(player, hurt) == Some(true) {
+            spike.add_death();
+            ev_reset_level.send(ResetLevel::Respawn);
+            return;
+        }
+    }
 }

@@ -12,6 +12,7 @@ impl GroupLabel {
     pub const LIGHT_SENSOR: Group = Group::GROUP_5;
     pub const HURT_BOX: Group = Group::GROUP_6;
     pub const WHITE_RAY: Group = Group::GROUP_7;
+    pub const STRAND: Group = Group::GROUP_8;
 }
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]

@@ -7,6 +7,13 @@ pub struct LevelSetupPlugin;
 impl Plugin for LevelSetupPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(LevelSelection::index(3))
+            .insert_resource(LdtkSettings {
+                level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation {
+                    load_level_neighbors: true,
+                },
+                level_background: LevelBackground::Nonexistent,
+                ..default()
+            })
             .add_systems(Startup, setup_level);
     }
 }

@@ -17,7 +17,7 @@ pub mod segments;
 pub mod sensor;
 
 /// The speed of the light beam in units per [`FixedUpdate`].
-const LIGHT_SPEED: f32 = 10.0;
+const LIGHT_SPEED: f32 = 8.0;
 
 /// The width of the rectangle used to represent [`LightSegment`](segments::LightSegmentBundle)s.
 const LIGHT_SEGMENT_THICKNESS: f32 = 3.0;
@@ -49,7 +49,7 @@ impl Plugin for LightManagementPlugin {
 }
 
 /// [`Enum`] for each of the light colors.
-#[derive(Enum, Clone, Copy, Default, PartialEq, Debug)]
+#[derive(Enum, Clone, Copy, Default, PartialEq, Debug, Eq, Hash)]
 pub enum LightColor {
     #[default]
     Green,
@@ -80,6 +80,17 @@ impl From<LightColor> for LightMaterial {
     }
 }
 
+impl From<&String> for LightColor {
+    fn from(value: &String) -> Self {
+        match value.as_str() {
+            "Red" => LightColor::Red,
+            "Green" => LightColor::Green,
+            "White" => LightColor::White,
+            _ => panic!("String {} does not represent Light Color", value),
+        }
+    }
+}
+
 impl LightColor {
     /// The number of bounces off of terrain each [`LightColor`] can make.
     pub fn num_bounces(&self) -> usize {
@@ -100,4 +111,5 @@ pub struct LightRaySource {
     pub start_dir: Vec2,
     pub time_traveled: f32,
     pub color: LightColor,
+    pub num_bounces: usize,
 }
