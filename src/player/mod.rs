@@ -16,7 +16,10 @@ use crate::{
 };
 
 use kill::{kill_player_on_spike, reset_player_on_level_switch, reset_player_position};
-use light::{handle_color_switch, preview_light_path, shoot_light, PlayerLightInventory};
+use light::{
+    despawn_angle_indicator, handle_color_switch, preview_light_path, shoot_light,
+    spawn_angle_indicator, PlayerLightInventory,
+};
 use movement::{move_player, queue_jump, PlayerMovement};
 use spawn::{add_player_sensors, init_player_bundle, PlayerHurtMarker};
 
@@ -54,6 +57,8 @@ impl Plugin for PlayerManagementPlugin {
             (
                 handle_color_switch,
                 preview_light_path.run_if(input_pressed(MouseButton::Left)),
+                spawn_angle_indicator.run_if(input_just_pressed(MouseButton::Left)),
+                despawn_angle_indicator.run_if(input_just_released(MouseButton::Left)),
                 shoot_light.run_if(input_just_released(MouseButton::Left)),
             )
                 .chain()
@@ -71,8 +76,11 @@ impl Plugin for PlayerManagementPlugin {
                 .run_if(input_just_pressed(KeyCode::KeyR))
                 .run_if(in_state(GameState::Playing)),
         )
-        .add_systems(Update, kill_player_on_spike)
-        .add_systems(FixedUpdate, update_strand)
+        .add_systems(
+            Update,
+            kill_player_on_spike.in_set(LevelSystems::Simulation),
+        )
+        .add_systems(FixedUpdate, update_strand.in_set(LevelSystems::Simulation))
         .add_systems(FixedPreUpdate, pre_update_match_player_pixel)
         .add_systems(FixedPostUpdate, post_update_match_player_pixel)
         .add_systems(FixedUpdate, update_match_player_z)
@@ -80,7 +88,10 @@ impl Plugin for PlayerManagementPlugin {
             PreUpdate,
             add_player_hair_and_cloth.in_set(LevelSystems::Processing),
         )
-        .add_systems(FixedUpdate, update_player_strand_offsets);
+        .add_systems(
+            FixedUpdate,
+            update_player_strand_offsets.in_set(LevelSystems::Simulation),
+        );
     }
 }
 
