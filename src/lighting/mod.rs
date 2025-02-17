@@ -34,17 +34,9 @@ impl Plugin for LightingPlugin {
             .init_resource::<LightingRenderData>()
             .add_systems(Startup, setup)
             .add_systems(PostUpdate, update_debug_frames_sprite.after(move_camera))
-            .add_systems(
-                PostUpdate,
-                update_light_overlay_position
-                    .after(move_camera)
-                    .after(draw_lights),
-            )
             .add_systems(PostUpdate, draw_lights.after(move_camera));
     }
 }
-#[derive(Component)]
-pub struct LightRenderLayer;
 
 #[derive(Component)]
 pub struct DebugFramesSprite;
@@ -131,20 +123,6 @@ fn setup(mut commands: Commands, lighting_render_data: Res<LightingRenderData>) 
         Transform::default(),
         BLURRED_LAYER.clone(),
     ));
-}
-
-fn update_light_overlay_position(
-    q_camera: Query<&Transform, With<MainCamera>>,
-    mut q_light_layer: Query<&mut Transform, (With<LightRenderLayer>, Without<MainCamera>)>,
-) {
-    let Ok(camera_pos) = q_camera.get_single() else {
-        return;
-    };
-    let Ok(mut light_layer_pos) = q_light_layer.get_single_mut() else {
-        return;
-    };
-
-    light_layer_pos.translation = camera_pos.translation.with_z(light_layer_pos.translation.z);
 }
 
 fn update_debug_frames_sprite(

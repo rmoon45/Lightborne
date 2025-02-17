@@ -84,7 +84,7 @@ fn fragment(mesh: VertexOutput) -> @location(0) vec4<f32> {
 
 
 
-    intensity = pow(dist_normal, 1.7);
+    intensity = pow(dist_normal, 1.8);
 
 
     // if intensity < 0.1 {

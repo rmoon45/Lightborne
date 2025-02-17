@@ -14,6 +14,32 @@ use super::{
     CombinedLighting, LightingRenderData, FRAMES_LAYER,
 };
 
+/// [`Component`] that automatically attaches [`Occluder`] components as children of an entity based on the shape of its [`Collider`].
+/// Also automatically removes and reattaches [`Occluder`]s when the [`Collider`] is removed/reattached (e.g. crystals).
+/// Currently only works on cuboid colliders.
+#[derive(Component)]
+pub struct ColliderBasedOccluder {
+    /// How many pixels to reduce the size of the collider by.
+    /// Used mainly to make crystal occluders a bit smaller to allow light to pass through in a cool way.
+    pub indent: f32,
+}
+
+impl Default for ColliderBasedOccluder {
+    fn default() -> Self {
+        Self { indent: 0.0 }
+    }
+}
+
+/// [`Component`] that represents a line that prevents light from passing through.
+/// The two points that make up the line are calculated by adding `point_1_offset` and `point_2_offset`
+/// to the entity's [`Transform`].
+#[derive(Component)]
+#[require(Transform)]
+pub struct Occluder {
+    pub point_1_offset: Vec2,
+    pub point_2_offset: Vec2,
+}
+
 pub struct OccluderPlugin;
 impl Plugin for OccluderPlugin {
     fn build(&self, app: &mut App) {
@@ -25,32 +51,19 @@ impl Plugin for OccluderPlugin {
     }
 }
 
+/// [`Component`] used to internally to render each occluder. Every time an [`Occluder`] component
+/// is spawned/inserted, 16 [`OccluderRendererBundle`]s are spawned, one to occlude each light source. They are despawned
+/// when the entity is despawned or the [`Occluder`] component is removed.
+///
+/// Note: You shouldn't use this component, use [`Occluder`] instead.
 #[derive(Component)]
-pub struct ColliderBasedOccluder {
-    pub indent: f32,
-}
-
-impl Default for ColliderBasedOccluder {
-    fn default() -> Self {
-        Self { indent: 0.0 }
-    }
-}
-
-#[derive(Component)]
-#[require(Transform)]
-pub struct Occluder {
-    pub point_1_offset: Vec2,
-    pub point_2_offset: Vec2,
-}
-
-#[derive(Component)]
-pub struct OccluderRenderer {
+struct OccluderRenderer {
     pub frame_index: usize,
     pub occluder: Entity,
 }
 
 #[derive(Bundle)]
-pub struct OccluderRendererBundle {
+struct OccluderRendererBundle {
     occluder_renderer: OccluderRenderer,
     render_layers: RenderLayers,
     material: MeshMaterial2d<FrameMaskMaterial>,
@@ -75,7 +88,7 @@ impl OccluderRendererBundle {
     }
 }
 
-pub fn spawn_collider_occluders(
+fn spawn_collider_occluders(
     mut commands: Commands,
     q_colliders: Query<(Entity, &Collider, &ColliderBasedOccluder), Added<Collider>>,
 ) {
@@ -114,7 +127,7 @@ pub fn spawn_collider_occluders(
     }
 }
 
-pub fn despawn_collider_occluders(
+fn despawn_collider_occluders(
     mut commands: Commands,
     mut removed: RemovedComponents<Collider>,
     q_colliders: Query<(Entity, &Children), With<ColliderBasedOccluder>>,
@@ -136,7 +149,7 @@ pub fn despawn_collider_occluders(
     }
 }
 
-pub fn spawn_occluder_renderers(
+fn spawn_occluder_renderers(
     mut commands: Commands,
     q_occluders: Query<Entity, Added<Occluder>>,
     render: Res<LightingRenderData>,
@@ -148,7 +161,7 @@ pub fn spawn_occluder_renderers(
     }
 }
 
-pub fn on_remove_occluder_despawn_occluder_renderers(
+fn on_remove_occluder_despawn_occluder_renderers(
     removed: Trigger<OnRemove, Occluder>,
     mut commands: Commands,
     q_occluder_renderers: Query<(Entity, &OccluderRenderer)>,
@@ -186,7 +199,7 @@ fn vector_to_segment(p: Vec2, a: Vec2, b: Vec2) -> Vec2 {
     return closest_point - p;
 }
 
-pub fn draw_occluders(
+fn draw_occluders(
     mut meshes: ResMut<Assets<Mesh>>,
 
     mut q_occluder_renderers: Query<

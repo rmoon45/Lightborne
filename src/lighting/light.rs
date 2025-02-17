@@ -9,7 +9,7 @@ use super::{
 };
 
 /// [`Component`] that represents a light spread evenly around a line segment, used primarily for the laser lights.
-/// The two points of the line segment are calculated based on the transform's rotation and x scale:
+/// The two points of the line segment are calculated based on the entity's [`Transform`] component, using the rotation and x scale:
 /// ```no_run
 /// let unit_vec = transform
 ///     .rotation
@@ -18,18 +18,24 @@ use super::{
 /// let point_1 = transform.translation.truncate() + unit_vec * transform.scale.x / 2.;
 /// let point_2 = transform.translation.truncate() - unit_vec * transform.scale.x / 2.;
 /// ```
+/// Note that there currently can only be a total of 16 entities with [`LineLighting`] or [`PointLighting`].
+/// Any lights above that limit won't be rendered.
 #[derive(Component, Debug, Default, Clone)]
 #[require(Transform, Visibility)]
 pub struct LineLighting {
     pub radius: f32,
+    /// RGB representation of the color, the higher each number the brighter the light
     pub color: Vec3,
 }
 
-/// [`Component`] that represents a light spread evenly around a point.
+/// [`Component`] that represents a light spread evenly around a point. Named "PointLighting" to disambiguate from Bevy's [`PointLight`].
+/// Note that there currently can only be a total of 16 entities with [`LineLighting`] or [`PointLighting`].
+/// Any lights above that limit won't be rendered.
 #[derive(Component, Debug, Default, Clone)]
 #[require(Transform, Visibility)]
 pub struct PointLighting {
     pub radius: f32,
+    /// RGB representation of the color, the higher each number the brighter the light
     pub color: Vec3,
 }
 
