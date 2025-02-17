@@ -1,21 +1,18 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, render::view::RenderLayers};
 use bevy_ecs_ldtk::{prelude::*, systems::process_ldtk_levels};
 
 use crate::{
     player::{LdtkPlayerBundle, PlayerMarker},
     shared::{GameState, ResetLevel},
 };
-use activatable::ActivatablePlugin;
 use crystal::CrystalPlugin;
 use entity::SpikeBundle;
-use misc::{init_start_marker, process_buttons, ButtonBundle, StartFlagBundle};
+use misc::{init_start_marker, ButtonBundle, StartFlagBundle};
 use setup::LevelSetupPlugin;
 use walls::{spawn_wall_collision, WallBundle};
 
-pub mod activatable;
-mod crystal;
+pub mod crystal;
 pub mod entity;
-pub mod interactable;
 pub mod misc;
 mod setup;
 mod walls;
@@ -27,19 +24,18 @@ impl Plugin for LevelManagementPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(LdtkPlugin)
             .add_plugins(LevelSetupPlugin)
-            .add_plugins(ActivatablePlugin)
             .add_plugins(CrystalPlugin)
             .init_resource::<CurrentLevel>()
             .register_ldtk_entity::<LdtkPlayerBundle>("Lyra")
             .register_ldtk_entity::<ButtonBundle>("Button")
             .register_ldtk_entity::<StartFlagBundle>("Start")
-            .register_ldtk_int_cell::<WallBundle>(1)
-            .register_ldtk_int_cell::<SpikeBundle>(2)
+            .register_ldtk_int_cell_for_layer::<WallBundle>("Terrain", 1)
+            .register_ldtk_int_cell_for_layer::<SpikeBundle>("Terrain", 2)
             .add_systems(
                 PreUpdate,
-                (spawn_wall_collision, init_start_marker, process_buttons)
-                    .in_set(LevelSystems::Processing),
+                (spawn_wall_collision, init_start_marker).in_set(LevelSystems::Processing),
             )
+            .add_systems(Startup, spawn_background)
             .add_systems(Update, switch_level)
             .configure_sets(
                 PreUpdate,
@@ -59,7 +55,7 @@ impl Plugin for LevelManagementPlugin {
 /// [`Resource`] that holds the `level_iid` of the current level.
 #[derive(Default, Resource)]
 pub struct CurrentLevel {
-    pub level_iid: String,
+    pub level_iid: LevelIid,
     pub level_entity: Option<Entity>,
     pub world_box: Rect,
 }
@@ -71,6 +67,23 @@ pub enum LevelSystems {
     Simulation,
     /// Systems used to process Ldtk Entities after they spawn in [`PreUpdate`]
     Processing,
+}
+
+#[derive(Component)]
+pub struct BackgroundMarker;
+
+fn spawn_background(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.spawn((
+        Sprite {
+            image: asset_server.load("levels/background.png"),
+            color: Color::srgb(0.3, 0.3, 0.3),
+            ..default()
+        },
+        Transform::default(),
+        Visibility::Visible,
+        BackgroundMarker,
+        RenderLayers::layer(1),
+    ));
 }
 
 /// [`System`] that will run on [`Update`] to check if the Player has moved to another level. If
@@ -104,13 +117,13 @@ fn switch_level(
         );
 
         if world_box.contains(transform.translation.xy()) {
-            if current_level.level_iid != level_iid.as_str() {
-                if !current_level.level_iid.is_empty() {
+            if current_level.level_iid != *level_iid {
+                if !current_level.level_iid.get().is_empty() {
                     ev_reset_level.send(ResetLevel::Switching);
                 }
 
                 *current_level = CurrentLevel {
-                    level_iid: level_iid.to_string(),
+                    level_iid: level_iid.clone(),
                     level_entity: Some(entity),
                     world_box,
                 };
