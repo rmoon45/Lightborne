@@ -7,6 +7,7 @@
 @group(2) @binding(2) var<uniform> light_colors: array<vec4<f32>, 16>; // RGB color of the light
 
 
+
 const frame_size: vec2<f32> = vec2<f32>(320.0, 180.0);
 const texture_size: vec2<f32> = vec2<f32>(1280.0, 720.0);
 const frame_count: vec2<i32> = vec2<i32>(4, 4);

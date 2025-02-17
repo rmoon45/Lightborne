@@ -12,6 +12,7 @@ use strand::{add_player_hair_and_cloth, update_player_strand_offsets, update_str
 use crate::{
     input::update_cursor_world_coords,
     level::LevelSystems,
+    lighting::light::PointLighting,
     shared::{GameState, ResetLevel},
 };
 
@@ -112,6 +113,7 @@ pub struct PlayerBundle {
     restitution: Restitution,
     player_movement: PlayerMovement,
     light_inventory: PlayerLightInventory,
+    point_lighting: PointLighting,
 }
 
 /// [`Bundle`] registered with Ldtk that will be spawned in with the level.

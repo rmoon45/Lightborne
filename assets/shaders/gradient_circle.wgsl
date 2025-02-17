@@ -4,7 +4,7 @@
 @group(0) @binding(1) var<uniform> globals: Globals;
 
 @group(2) @binding(0) var<uniform> light_points: array<vec4<f32>, 16>; // Center of the light (in normalized screen space)
-@group(2) @binding(1) var<uniform> light_radius: f32; // Radius of the light gradient
+@group(2) @binding(1) var<uniform> light_radiuses: array<vec4<f32>, 16>; // Radius of the light gradient
 @group(2) @binding(2) var<uniform> mesh_transform: vec4<f32>; // Radius of the light gradient
 
 fn vector_to_segment(p: vec2<f32>, a: vec2<f32>, b: vec2<f32>) -> vec2<f32> {
@@ -58,6 +58,11 @@ fn fragment(mesh: VertexOutput) -> @location(0) vec4<f32> {
 
     let light_index = frame_i + frame_j * 4;
     let light = light_points[light_index];
+    let light_radius = light_radiuses[light_index].x;
+
+    if light_radius == 0.0 {
+        return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    }
 
     let frame_x: f32 = (mesh.uv.x - f32(frame_i) * 0.25) * 4.0;
     let frame_y: f32 = (mesh.uv.y - f32(frame_j) * 0.25) * 4.0;
@@ -74,12 +79,12 @@ fn fragment(mesh: VertexOutput) -> @location(0) vec4<f32> {
     // Normalize the distance based on the light radius (0 at center, 1 at the edge)
 
     let t: f32 = globals.time;
-    let radius: f32 = light_radius + sin(t * 2.0) * 5.0;
+    let radius: f32 = max(0.0, light_radius + sin(t * 2.0) * 5.0);
     let dist_normal = 1.0 - clamp(dist / radius, 0.0, 1.0);
 
 
 
-    intensity = pow(dist_normal, 2.0);
+    intensity = pow(dist_normal, 1.7);
 
 
     // if intensity < 0.1 {

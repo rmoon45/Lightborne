@@ -9,6 +9,8 @@
 
 @group(2) @binding(0) var texture_image: texture_2d<f32>;
 @group(2) @binding(1) var texture_sampler: sampler;
+@group(2) @binding(0) var light_image: texture_2d<f32>;
+@group(2) @binding(1) var light_sampler: sampler;
 
 
 
@@ -43,8 +45,9 @@ fn fragment(mesh: VertexOutput) -> @location(0) vec4<f32> {
     }
 
     let final_color = blurred_color / kernel_sum;
-    let current_brightness = dot(final_color.xyz, vec3<f32>(0.2126, 0.7152, 0.0722));
-    let target_brightness = 0.8;
-    let ret = final_color.xyz * (target_brightness / current_brightness);
-    return vec4<f32>(ret, current_brightness * 3.1);
+    // let current_brightness = dot(final_color.xyz, vec3<f32>(0.2126, 0.7152, 0.0722));
+    // let target_brightness = 0.8;
+    // let ret = final_color.xyz * (target_brightness / current_brightness);
+    // var brightness = current_brightness * 3.1;
+    return vec4<f32>(final_color.xyz, 1.0);
 }
