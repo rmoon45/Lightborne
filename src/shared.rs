@@ -13,6 +13,8 @@ impl GroupLabel {
     pub const HURT_BOX: Group = Group::GROUP_6;
     pub const WHITE_RAY: Group = Group::GROUP_7;
     pub const STRAND: Group = Group::GROUP_8;
+    pub const BLUE_RAY: Group = Group::GROUP_9;
+    pub const ALL: Group = Group::from_bits_truncate(!0);
 }
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]

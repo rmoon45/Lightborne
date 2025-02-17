@@ -34,6 +34,7 @@ impl FromWorld for LightRenderData {
                 LightColor::Green => materials.add(LightMaterial::from(LightColor::Green)).into(),
                 LightColor::Red => materials.add(LightMaterial::from(LightColor::Red)).into(),
                 LightColor::White => materials.add(LightMaterial::from(LightColor::White)).into(),
+                LightColor::Blue => materials.add(LightMaterial::from(LightColor::Blue)).into(),
             },
         }
     }

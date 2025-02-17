@@ -69,7 +69,8 @@ impl From<IntGridCell> for FixedEntityBundle {
                     GroupLabel::LIGHT_RAY
                         | GroupLabel::PLAYER_SENSOR
                         | GroupLabel::WHITE_RAY
-                        | GroupLabel::STRAND,
+                        | GroupLabel::STRAND
+                        | GroupLabel::BLUE_RAY
                 ),
             },
             _ => unreachable!(),
