@@ -108,6 +108,7 @@ impl LightColor {
             LightColor::Red => Vec3::new(1.0, 0.1, 0.1),
             LightColor::Green => Vec3::new(0.0, 1.0, 0.0),
             LightColor::White => Vec3::new(0.8, 0.8, 0.5),
+            LightColor::Blue => Vec3::new(0.0, 0.0, 1.0),
         }
     }
 }
