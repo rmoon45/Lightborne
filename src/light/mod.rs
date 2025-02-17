@@ -55,6 +55,7 @@ pub enum LightColor {
     Green,
     Red,
     White,
+    Blue,
 }
 
 /// [`Color`] corresponding to each of the [`LightColor`]s. Note that the color values are greater
@@ -65,6 +66,7 @@ impl From<LightColor> for Color {
             LightColor::Red => Color::srgb(5.0, 0.0, 3.0),
             LightColor::Green => Color::srgb(3.0, 5.0, 0.0),
             LightColor::White => Color::srgb(2.0, 2.0, 2.0),
+            LightColor::Blue => Color::srgb(0.0, 0.0, 3.0),
         }
     }
 }
@@ -86,6 +88,7 @@ impl From<&String> for LightColor {
             "Red" => LightColor::Red,
             "Green" => LightColor::Green,
             "White" => LightColor::White,
+            "Blue" => LightColor::Blue,
             _ => panic!("String {} does not represent Light Color", value),
         }
     }

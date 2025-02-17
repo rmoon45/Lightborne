@@ -65,6 +65,9 @@ pub fn handle_color_switch(
     if keys.just_pressed(KeyCode::Digit3) {
         inventory.current_color = LightColor::White;
     }
+    if keys.just_pressed(KeyCode::Digit4) {
+        inventory.current_color = LightColor::Blue;
+    }
 }
 
 /// [`System`] that spawns a [`LightRaySource`] when the player releases the left mouse button.
@@ -156,6 +159,10 @@ pub fn preview_light_path(
         LightColor::White => CollisionGroups::new(
             GroupLabel::WHITE_RAY,
             GroupLabel::TERRAIN | GroupLabel::LIGHT_SENSOR,
+        ),
+        LightColor::Blue => CollisionGroups::new(
+            GroupLabel::BLUE_RAY,
+            GroupLabel::TERRAIN | GroupLabel::LIGHT_SENSOR | GroupLabel::WHITE_RAY,
         ),
         _ => CollisionGroups::new(
             GroupLabel::LIGHT_RAY,

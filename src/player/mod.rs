@@ -21,7 +21,7 @@ use light::{
     despawn_angle_indicator, handle_color_switch, preview_light_path, shoot_light,
     spawn_angle_indicator, PlayerLightInventory,
 };
-use movement::{move_player, queue_jump, PlayerMovement};
+use movement::{move_player, crouch_player, queue_jump, PlayerMovement};
 use spawn::{add_player_sensors, init_player_bundle, PlayerHurtMarker};
 
 mod kill;
@@ -50,6 +50,12 @@ impl Plugin for PlayerManagementPlugin {
             Update,
             queue_jump
                 .run_if(input_just_pressed(KeyCode::Space))
+                .before(move_player)
+                .in_set(LevelSystems::Simulation),
+        )
+        .add_systems(
+            Update,
+            crouch_player
                 .before(move_player)
                 .in_set(LevelSystems::Simulation),
         )
