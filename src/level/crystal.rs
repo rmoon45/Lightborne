@@ -5,7 +5,7 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_ecs_tilemap::tiles::TileTextureIndex;
 use bevy_rapier2d::prelude::*;
 
-use crate::{light::LightColor, shared::ResetLevel};
+use crate::{light::LightColor, shared::{ResetLevel, GroupLabel}};
 
 use super::{CurrentLevel, LevelSystems};
 
@@ -30,7 +30,7 @@ impl Plugin for CrystalPlugin {
             .add_systems(Update, on_crystal_changed.in_set(LevelSystems::Simulation))
             .add_systems(FixedUpdate, reset_crystals.run_if(on_event::<ResetLevel>));
 
-        for i in 3..=8 {
+        for i in 3..=10 {
             app.register_ldtk_int_cell_for_layer::<CrystalBundle>("Terrain", i);
         }
 
@@ -159,8 +159,8 @@ fn init_crystal_cache_and_ids(
 /// in the future.
 fn is_crystal_active(cell_value: IntGridCell) -> bool {
     match cell_value.value {
-        3 | 5 | 7 => true,
-        4 | 6 | 8 => false,
+        3 | 5 | 7 | 9 => true,
+        4 | 6 | 8 | 10 => false,
         _ => panic!("Cell value does not correspond to crystal!"),
     }
 }
@@ -171,6 +171,7 @@ fn crystal_color(cell_value: IntGridCell) -> LightColor {
         3 | 4 => LightColor::Red,
         5 | 6 => LightColor::Green,
         7 | 8 => LightColor::White,
+        9 | 10 => LightColor::Blue,
         _ => panic!("Cell value does not correspond to crystal!"),
     }
 }
@@ -205,8 +206,16 @@ fn add_crystal_colliders(
     q_crystals: Query<(Entity, &IntGridCell), Added<Crystal>>,
 ) {
     for (entity, cell) in q_crystals.iter() {
+        if crystal_color(*cell) == LightColor::Blue {
+            let mut collider = commands.entity(entity);
+            collider.insert(CollisionGroups::new(
+                GroupLabel::TERRAIN,
+                GroupLabel::ALL & !GroupLabel::BLUE_RAY
+            ));
+        }
         if is_crystal_active(*cell) {
-            commands.entity(entity).insert(Collider::cuboid(4.0, 4.0));
+            let mut collider = commands.entity(entity);
+            collider.insert(Collider::cuboid(4.0, 4.0));
         }
     }
 }

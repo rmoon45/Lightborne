@@ -61,7 +61,7 @@ impl FromWorld for LightSegmentCache {
                         Sensor,
                         CollisionGroups::new(
                             GroupLabel::WHITE_RAY,
-                            GroupLabel::TERRAIN | GroupLabel::LIGHT_SENSOR | GroupLabel::LIGHT_RAY,
+                            GroupLabel::TERRAIN | GroupLabel::LIGHT_SENSOR | GroupLabel::LIGHT_RAY | GroupLabel::BLUE_RAY,
                         ),
                     ));
                 }
@@ -119,6 +119,10 @@ pub fn simulate_light_sources(
             LightColor::White => CollisionGroups::new(
                 GroupLabel::WHITE_RAY,
                 GroupLabel::TERRAIN | GroupLabel::LIGHT_SENSOR,
+            ),
+            LightColor::Blue => CollisionGroups::new(
+                GroupLabel::BLUE_RAY,
+                GroupLabel::TERRAIN | GroupLabel::LIGHT_SENSOR | GroupLabel::WHITE_RAY,
             ),
             _ => CollisionGroups::new(
                 GroupLabel::LIGHT_RAY,
