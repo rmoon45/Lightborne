@@ -64,7 +64,7 @@ fn setup_camera(mut commands: Commands) {
             ..default()
         },
         Tonemapping::TonyMcMapface,
-        Bloom::default(),
+        // Bloom::default(),
         projection.clone(),
         Transform::default(),
     ));

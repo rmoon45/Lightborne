@@ -102,6 +102,15 @@ impl LightColor {
             _ => 1,
         }
     }
+
+    pub fn lighting_color(&self) -> Vec3 {
+        match self {
+            LightColor::Red => Vec3::new(1.0, 0.1, 0.1),
+            LightColor::Green => Vec3::new(0.0, 1.0, 0.0),
+            LightColor::White => Vec3::new(0.8, 0.8, 0.5),
+            LightColor::Blue => Vec3::new(0.0, 0.0, 1.0),
+        }
+    }
 }
 
 /// A [`Component`] marking the start of a light ray. These are spawned in
