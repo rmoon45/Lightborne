@@ -6467,7 +6467,7 @@
 						},
 						{
 							"__identifier": "Lyra",
-							"__grid": [6,18],
+							"__grid": [6,19],
 							"__pivot": [0.5,1],
 							"__tags": [],
 							"__tile": null,
@@ -6476,9 +6476,25 @@
 							"width": 16,
 							"height": 19,
 							"defUid": 106,
-							"px": [52,152],
+							"px": [52,160],
 							"fieldInstances": [],
 							"__worldX": 52,
+							"__worldY": 160
+						},
+						{
+							"__identifier": "Start",
+							"__grid": [6,19],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": { "tilesetUid": 105, "x": 256, "y": 144, "w": 16, "h": 16 },
+							"__smartColor": "#3E8948",
+							"iid": "878c41b0-e920-11ef-942c-2f550eb1010f",
+							"width": 8,
+							"height": 8,
+							"defUid": 185,
+							"px": [48,152],
+							"fieldInstances": [],
+							"__worldX": 48,
 							"__worldY": 152
 						}
 					]
