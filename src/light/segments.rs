@@ -48,7 +48,7 @@ impl FromWorld for LightSegmentCache {
                 visibility: Visibility::Hidden,
                 transform: Transform::default(),
                 line_light: LineLighting {
-                    radius: 40.0,
+                    radius: 20.0,
                     color: color.lighting_color(),
                 },
             }
@@ -66,7 +66,10 @@ impl FromWorld for LightSegmentCache {
                         Sensor,
                         CollisionGroups::new(
                             GroupLabel::WHITE_RAY,
-                            GroupLabel::TERRAIN | GroupLabel::LIGHT_SENSOR | GroupLabel::LIGHT_RAY | GroupLabel::BLUE_RAY,
+                            GroupLabel::TERRAIN
+                                | GroupLabel::LIGHT_SENSOR
+                                | GroupLabel::LIGHT_RAY
+                                | GroupLabel::BLUE_RAY,
                         ),
                     ));
                 }
