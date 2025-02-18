@@ -278,7 +278,7 @@ fn draw_occluders(
             out_of_bounds(camera_point(point_1)) || out_of_bounds(camera_point(point_2));
 
         let is_out_of_lights = point_1_to_segment.length() > *radius
-            && point_1_to_segment.length() > *radius
+            && point_2_to_segment.length() > *radius
             && (point_1 - point_2).length() < *radius * 2.0;
 
         if is_out_of_bounds || is_out_of_lights {
