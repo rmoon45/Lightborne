@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use super::PlayerMarker;
+use super::{PlayerMarker, spawn::PlayerHurtMarker};
 
 /// The number of [`FixedUpdate`] steps the player can jump for after pressing the spacebar.
 const SHOULD_JUMP_TICKS: isize = 8;
@@ -44,6 +44,7 @@ pub fn queue_jump(mut q_player: Query<&mut PlayerMovement, With<PlayerMarker>>) 
 pub fn crouch_player(
     // query transform
     mut q_player: Query<(&mut PlayerMovement, &mut Transform), With<PlayerMarker>>,
+    mut q_hitbox: Query<&mut Transform, (With<PlayerHurtMarker>, Without<PlayerMarker>)>,
     //ButtonInput<KeyCode> resource (access resource)
     keys: Res<ButtonInput<KeyCode>>,
 ) {
@@ -51,6 +52,10 @@ pub fn crouch_player(
     let Ok((mut _player, mut transform)) = q_player.get_single_mut() else {
         return;
     };
+    let Ok(mut hitbox_transform) = q_hitbox.get_single_mut() else {
+        return;
+    };
+    hitbox_transform.translation = Vec3::new(0., 0., 0.);
 
     if keys.just_pressed(KeyCode::KeyS) {
         // decrease size by half
