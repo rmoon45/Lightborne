@@ -12,6 +12,7 @@ use strand::{add_player_hair_and_cloth, update_player_strand_offsets, update_str
 use crate::{
     input::update_cursor_world_coords,
     level::{LevelSystems, entity::{set_semisolid, adjust_semisolid_colliders}},
+    lighting::light::PointLighting,
     shared::{GameState, ResetLevel},
 };
 
@@ -20,12 +21,12 @@ use light::{
     despawn_angle_indicator, handle_color_switch, preview_light_path, shoot_light,
     spawn_angle_indicator, PlayerLightInventory,
 };
-use movement::{move_player, queue_jump, PlayerMovement};
+use movement::{move_player, crouch_player, queue_jump, PlayerMovement};
 use spawn::{add_player_sensors, init_player_bundle, PlayerHurtMarker};
 
 mod kill;
 pub mod light;
-mod match_player;
+pub mod match_player;
 pub mod movement;
 mod spawn;
 mod strand;
@@ -49,6 +50,12 @@ impl Plugin for PlayerManagementPlugin {
             Update,
             queue_jump
                 .run_if(input_just_pressed(KeyCode::Space))
+                .before(move_player)
+                .in_set(LevelSystems::Simulation),
+        )
+        .add_systems(
+            Update,
+            crouch_player
                 .before(move_player)
                 .in_set(LevelSystems::Simulation),
         )
@@ -119,6 +126,7 @@ pub struct PlayerBundle {
     restitution: Restitution,
     player_movement: PlayerMovement,
     light_inventory: PlayerLightInventory,
+    point_lighting: PointLighting,
 }
 
 /// [`Bundle`] registered with Ldtk that will be spawned in with the level.

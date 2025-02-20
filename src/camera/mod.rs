@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use bevy::{
-    core_pipeline::{bloom::Bloom, tonemapping::Tonemapping},
+    core_pipeline::tonemapping::Tonemapping,
     ecs::system::SystemId,
     prelude::*,
     render::{camera::ScalingMode, view::RenderLayers},
@@ -64,7 +64,7 @@ fn setup_camera(mut commands: Commands) {
             ..default()
         },
         Tonemapping::TonyMcMapface,
-        Bloom::default(),
+        // Bloom::default(),
         projection.clone(),
         Transform::default(),
     ));

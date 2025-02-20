@@ -5,7 +5,11 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_ecs_tilemap::tiles::TileTextureIndex;
 use bevy_rapier2d::prelude::*;
 
-use crate::{light::LightColor, shared::{ResetLevel, GroupLabel}};
+use crate::{
+    light::LightColor,
+    lighting::occluder::ColliderBasedOccluder,
+    shared::{GroupLabel, ResetLevel},
+};
 
 use super::{CurrentLevel, LevelSystems};
 
@@ -193,12 +197,23 @@ impl From<IntGridCell> for Crystal {
 
 /// [`Bundle`] registered with [`LdktEntityAppExt::register_ldtk_entity`](LdtkEntityAppExt) to spawn
 /// crystals directly from Ldtk.
-#[derive(Default, Bundle, LdtkIntCell)]
+#[derive(Bundle, LdtkIntCell)]
 pub struct CrystalBundle {
     #[from_int_grid_cell]
     crystal: Crystal,
     #[from_int_grid_cell]
     cell: IntGridCell,
+    collider_based_occluder: ColliderBasedOccluder,
+}
+
+impl Default for CrystalBundle {
+    fn default() -> Self {
+        Self {
+            collider_based_occluder: ColliderBasedOccluder { indent: 2.0 },
+            crystal: Crystal::default(),
+            cell: IntGridCell::default(),
+        }
+    }
 }
 
 fn add_crystal_colliders(
@@ -210,7 +225,7 @@ fn add_crystal_colliders(
             let mut collider = commands.entity(entity);
             collider.insert(CollisionGroups::new(
                 GroupLabel::TERRAIN,
-                GroupLabel::ALL & !GroupLabel::BLUE_RAY
+                GroupLabel::ALL & !GroupLabel::BLUE_RAY,
             ));
         }
         if is_crystal_active(*cell) {
