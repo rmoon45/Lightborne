@@ -2,7 +2,53 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::shared::GroupLabel;
+use crate::{shared::GroupLabel, player::PlayerMarker};
+use super::CurrentLevel;
+
+#[derive(Default, Component)]
+pub struct SemiSolid;
+
+/// Bundle for Semi-Solid Platforms
+#[derive(Default, Bundle, LdtkIntCell)]
+pub struct SemiSolidPlatformBundle {
+    #[from_int_grid_cell]
+    fixed_entity_bundle: FixedEntityBundle,
+    semi_solid: SemiSolid,
+}
+
+pub fn adjust_semisolid_colliders(
+    mut q_semisolid: Query<&mut Transform, With<SemiSolid>>,
+) {
+    for mut transform in q_semisolid.iter_mut() {
+        if transform.translation.y % 8. == 0. {
+            transform.translation.y += 3.;
+        }
+    }
+}
+
+/// Sets the state of SemiSolids based on Player's y coord
+pub fn set_semisolid(
+    q_player: Query<&Transform, With<PlayerMarker>>,
+    mut q_semisolid: Query<(&Transform, &mut CollisionGroups), With<SemiSolid>>,
+    level: Res<CurrentLevel>,
+) {
+    let Ok(player) = q_player.get_single() else {
+        return;
+    };
+    for (transform, mut collisions) in q_semisolid.iter_mut() {
+        if (player.translation.y - level.world_box.min.y) - transform.translation.y > 14.9 {
+            *collisions = CollisionGroups::new(
+                GroupLabel::TERRAIN,
+                GroupLabel::ALL
+            );
+        } else {
+            *collisions = CollisionGroups::new(
+                GroupLabel::TERRAIN,
+                GroupLabel::ALL & !GroupLabel::PLAYER_COLLIDER
+            );
+        }
+    }
+}
 
 /// Component for things that hurt
 #[derive(Default, Component)]
@@ -66,11 +112,15 @@ impl From<IntGridCell> for FixedEntityBundle {
                 rigid_body: RigidBody::Fixed,
                 collision_groups: CollisionGroups::new(
                     GroupLabel::TERRAIN,
-                    GroupLabel::LIGHT_RAY
-                        | GroupLabel::PLAYER_SENSOR
-                        | GroupLabel::WHITE_RAY
-                        | GroupLabel::STRAND
-                        | GroupLabel::BLUE_RAY
+                    GroupLabel::ALL & !GroupLabel::PLAYER_COLLIDER
+                ),
+            },
+            15 => FixedEntityBundle {
+                collider: Collider::cuboid(4., 1.),
+                rigid_body: RigidBody::Fixed,
+                collision_groups: CollisionGroups::new(
+                    GroupLabel::TERRAIN,
+                    GroupLabel::ALL
                 ),
             },
             _ => unreachable!(),
