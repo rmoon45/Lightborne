@@ -11,7 +11,10 @@ use strand::{add_player_hair_and_cloth, update_player_strand_offsets, update_str
 
 use crate::{
     input::update_cursor_world_coords,
-    level::{LevelSystems, entity::{set_semisolid, adjust_semisolid_colliders}},
+    level::{
+        entity::{adjust_semisolid_colliders, set_semisolid},
+        LevelSystems,
+    },
     lighting::light::PointLighting,
     shared::{GameState, ResetLevel},
 };
@@ -21,7 +24,9 @@ use light::{
     despawn_angle_indicator, handle_color_switch, preview_light_path, shoot_light,
     spawn_angle_indicator, PlayerLightInventory,
 };
-use movement::{move_player, crouch_player, queue_jump, PlayerMovement};
+use movement::{
+    crouch_player, move_player, queue_jump, update_player_state, PlayerMovement, PlayerState,
+};
 use spawn::{add_player_sensors, init_player_bundle, PlayerHurtMarker};
 
 mod kill;
@@ -87,12 +92,10 @@ impl Plugin for PlayerManagementPlugin {
             Update,
             kill_player_on_spike.in_set(LevelSystems::Simulation),
         )
+        .add_systems(Update, set_semisolid.in_set(LevelSystems::Simulation))
         .add_systems(
             Update,
-            set_semisolid.in_set(LevelSystems::Simulation),
-        )
-        .add_systems(
-            Update, adjust_semisolid_colliders.in_set(LevelSystems::Processing),
+            adjust_semisolid_colliders.in_set(LevelSystems::Processing),
         )
         .add_systems(FixedUpdate, update_strand.in_set(LevelSystems::Simulation))
         .add_systems(FixedPreUpdate, pre_update_match_player_pixel)
@@ -101,6 +104,10 @@ impl Plugin for PlayerManagementPlugin {
         .add_systems(
             PreUpdate,
             add_player_hair_and_cloth.in_set(LevelSystems::Processing),
+        )
+        .add_systems(
+            FixedUpdate,
+            update_player_state.after(PhysicsSet::Writeback),
         )
         .add_systems(
             FixedUpdate,
@@ -125,6 +132,7 @@ pub struct PlayerBundle {
     friction: Friction,
     restitution: Restitution,
     player_movement: PlayerMovement,
+    player_state: PlayerState,
     light_inventory: PlayerLightInventory,
     point_lighting: PointLighting,
 }

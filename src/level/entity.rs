@@ -2,8 +2,10 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{shared::GroupLabel, player::PlayerMarker};
-use super::CurrentLevel;
+use crate::{
+    player::{movement::PlayerMovement, PlayerMarker},
+    shared::GroupLabel,
+};
 
 #[derive(Default, Component)]
 pub struct SemiSolid;
@@ -16,35 +18,38 @@ pub struct SemiSolidPlatformBundle {
     semi_solid: SemiSolid,
 }
 
-pub fn adjust_semisolid_colliders(
-    mut q_semisolid: Query<&mut Transform, With<SemiSolid>>,
-) {
+pub fn adjust_semisolid_colliders(mut q_semisolid: Query<&mut Transform, Added<SemiSolid>>) {
     for mut transform in q_semisolid.iter_mut() {
-        if transform.translation.y % 8. == 0. {
-            transform.translation.y += 3.;
-        }
+        // if transform.translation.y % 8. == 0. {
+        transform.translation.y += 3.;
+        // }
     }
 }
 
 /// Sets the state of SemiSolids based on Player's y coord
 pub fn set_semisolid(
-    q_player: Query<&Transform, With<PlayerMarker>>,
-    mut q_semisolid: Query<(&Transform, &mut CollisionGroups), With<SemiSolid>>,
-    level: Res<CurrentLevel>,
+    q_player: Query<(&PlayerMovement, &GlobalTransform), With<PlayerMarker>>,
+    mut q_semisolid: Query<(&GlobalTransform, &mut CollisionGroups), With<SemiSolid>>,
 ) {
-    let Ok(player) = q_player.get_single() else {
+    let Ok((movement, player)) = q_player.get_single() else {
         return;
     };
+    const PLAYER_HALF_HEIGHT: f32 = 9.0;
+    let cutoff_height = if movement.crouching {
+        PLAYER_HALF_HEIGHT / 2.0
+    } else {
+        PLAYER_HALF_HEIGHT
+    };
+
     for (transform, mut collisions) in q_semisolid.iter_mut() {
-        if (player.translation.y - level.world_box.min.y) - transform.translation.y > 14.9 {
-            *collisions = CollisionGroups::new(
-                GroupLabel::TERRAIN,
-                GroupLabel::ALL
-            );
+        if player.compute_transform().translation.y - transform.compute_transform().translation.y
+            > cutoff_height
+        {
+            *collisions = CollisionGroups::new(GroupLabel::TERRAIN, GroupLabel::ALL);
         } else {
             *collisions = CollisionGroups::new(
                 GroupLabel::TERRAIN,
-                GroupLabel::ALL & !GroupLabel::PLAYER_COLLIDER
+                GroupLabel::ALL & !GroupLabel::PLAYER_COLLIDER,
             );
         }
     }
@@ -112,16 +117,13 @@ impl From<IntGridCell> for FixedEntityBundle {
                 rigid_body: RigidBody::Fixed,
                 collision_groups: CollisionGroups::new(
                     GroupLabel::TERRAIN,
-                    GroupLabel::ALL & !GroupLabel::PLAYER_COLLIDER
+                    GroupLabel::ALL & !GroupLabel::PLAYER_COLLIDER,
                 ),
             },
             15 => FixedEntityBundle {
                 collider: Collider::cuboid(4., 1.),
                 rigid_body: RigidBody::Fixed,
-                collision_groups: CollisionGroups::new(
-                    GroupLabel::TERRAIN,
-                    GroupLabel::ALL
-                ),
+                collision_groups: CollisionGroups::new(GroupLabel::TERRAIN, GroupLabel::ALL),
             },
             _ => unreachable!(),
         }
