@@ -6,7 +6,7 @@ use crate::{
     shared::{GameState, ResetLevel},
 };
 use crystal::CrystalPlugin;
-use entity::SpikeBundle;
+use entity::{SpikeBundle, SemiSolidPlatformBundle};
 use misc::{init_start_marker, ButtonBundle, StartFlagBundle};
 use setup::LevelSetupPlugin;
 use walls::{spawn_wall_collision, WallBundle};
@@ -31,6 +31,7 @@ impl Plugin for LevelManagementPlugin {
             .register_ldtk_entity::<StartFlagBundle>("Start")
             .register_ldtk_int_cell_for_layer::<WallBundle>("Terrain", 1)
             .register_ldtk_int_cell_for_layer::<SpikeBundle>("Terrain", 2)
+            .register_ldtk_int_cell_for_layer::<SemiSolidPlatformBundle>("Terrain", 15)
             .add_systems(
                 PreUpdate,
                 (spawn_wall_collision, init_start_marker).in_set(LevelSystems::Processing),

@@ -11,7 +11,7 @@ use strand::{add_player_hair_and_cloth, update_player_strand_offsets, update_str
 
 use crate::{
     input::update_cursor_world_coords,
-    level::LevelSystems,
+    level::{LevelSystems, entity::{set_semisolid, adjust_semisolid_colliders}},
     lighting::light::PointLighting,
     shared::{GameState, ResetLevel},
 };
@@ -86,6 +86,13 @@ impl Plugin for PlayerManagementPlugin {
         .add_systems(
             Update,
             kill_player_on_spike.in_set(LevelSystems::Simulation),
+        )
+        .add_systems(
+            Update,
+            set_semisolid.in_set(LevelSystems::Simulation),
+        )
+        .add_systems(
+            Update, adjust_semisolid_colliders.in_set(LevelSystems::Processing),
         )
         .add_systems(FixedUpdate, update_strand.in_set(LevelSystems::Simulation))
         .add_systems(FixedPreUpdate, pre_update_match_player_pixel)
