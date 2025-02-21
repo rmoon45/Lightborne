@@ -4,7 +4,11 @@ use bevy_rapier2d::prelude::*;
 
 use crate::{lighting::light::PointLighting, shared::GroupLabel};
 
-use super::{light::PlayerLightInventory, movement::PlayerMovement, PlayerBundle, PlayerMarker};
+use super::{
+    light::PlayerLightInventory,
+    movement::{PlayerMovement, PlayerState},
+    PlayerBundle, PlayerMarker,
+};
 
 /// Attached to player hitbox
 #[derive(Default, Component)]
@@ -26,6 +30,7 @@ pub fn init_player_bundle(_: &EntityInstance) -> PlayerBundle {
         collider: Collider::cuboid(6.0, 9.0),
         collision_groups: CollisionGroups::new(GroupLabel::PLAYER_COLLIDER, GroupLabel::TERRAIN),
         player_movement: PlayerMovement::default(),
+        player_state: PlayerState::Idle,
         friction: Friction {
             coefficient: 0.,
             combine_rule: CoefficientCombineRule::Min,
