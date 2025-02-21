@@ -66,7 +66,7 @@ impl From<LightColor> for Color {
             LightColor::Red => Color::srgb(5.0, 0.0, 3.0),
             LightColor::Green => Color::srgb(3.0, 5.0, 0.0),
             LightColor::White => Color::srgb(2.0, 2.0, 2.0),
-            LightColor::Blue => Color::srgb(0.0, 0.0, 3.0),
+            LightColor::Blue => Color::srgb(1.0, 2.0, 4.0),
         }
     }
 }

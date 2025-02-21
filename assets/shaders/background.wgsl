@@ -16,7 +16,7 @@ fn fragment(mesh: VertexOutput) -> @location(0) vec4<f32> {
     let background_color = textureSample(background_image, background_sampler, mesh_uv).xyz;
     let light_color = textureSample(light_image, light_sampler, mesh_uv).xyz;
 
-    let ambient_light = vec3(0.2, 0.2, 0.2);
+    let ambient_light = vec3(1., 1., 1.);
     let light = light_color * 25.0 + ambient_light;
     let blended = background_color * light + light_color * 0.2;
     return vec4<f32>(blended, 1.0);
