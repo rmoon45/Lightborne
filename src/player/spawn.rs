@@ -2,9 +2,13 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::shared::GroupLabel;
+use crate::{lighting::light::PointLighting, shared::GroupLabel};
 
-use super::{light::PlayerLightInventory, movement::PlayerMovement, PlayerBundle, PlayerMarker};
+use super::{
+    light::PlayerLightInventory,
+    movement::{PlayerMovement, PlayerState},
+    PlayerBundle, PlayerMarker,
+};
 
 /// Attached to player hitbox
 #[derive(Default, Component)]
@@ -15,9 +19,10 @@ pub fn init_player_bundle(_: &EntityInstance) -> PlayerBundle {
     PlayerBundle {
         body: RigidBody::KinematicPositionBased,
         controller: KinematicCharacterController {
-            filter_groups: Some(
-                CollisionGroups::new(GroupLabel::PLAYER_COLLIDER, GroupLabel::TERRAIN)
-            ),
+            filter_groups: Some(CollisionGroups::new(
+                GroupLabel::PLAYER_COLLIDER,
+                GroupLabel::TERRAIN,
+            )),
             offset: CharacterLength::Absolute(1.0),
             ..default()
         },
@@ -25,6 +30,7 @@ pub fn init_player_bundle(_: &EntityInstance) -> PlayerBundle {
         collider: Collider::cuboid(6.0, 9.0),
         collision_groups: CollisionGroups::new(GroupLabel::PLAYER_COLLIDER, GroupLabel::TERRAIN),
         player_movement: PlayerMovement::default(),
+        player_state: PlayerState::Idle,
         friction: Friction {
             coefficient: 0.,
             combine_rule: CoefficientCombineRule::Min,
@@ -34,6 +40,10 @@ pub fn init_player_bundle(_: &EntityInstance) -> PlayerBundle {
             combine_rule: CoefficientCombineRule::Min,
         },
         light_inventory: PlayerLightInventory::default(),
+        point_lighting: PointLighting {
+            color: Vec3::new(0.8, 0.8, 0.8),
+            radius: 40.0,
+        },
     }
 }
 

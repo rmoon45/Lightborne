@@ -66,7 +66,7 @@ impl From<LightColor> for Color {
             LightColor::Red => Color::srgb(5.0, 0.0, 3.0),
             LightColor::Green => Color::srgb(3.0, 5.0, 0.0),
             LightColor::White => Color::srgb(2.0, 2.0, 2.0),
-            LightColor::Blue => Color::srgb(0.0, 0.0, 3.0),
+            LightColor::Blue => Color::srgb(1.0, 2.0, 4.0),
         }
     }
 }
@@ -100,6 +100,15 @@ impl LightColor {
         match self {
             LightColor::Red => 2,
             _ => 1,
+        }
+    }
+
+    pub fn lighting_color(&self) -> Vec3 {
+        match self {
+            LightColor::Red => Vec3::new(1.0, 0.1, 0.1),
+            LightColor::Green => Vec3::new(0.0, 1.0, 0.0),
+            LightColor::White => Vec3::new(0.8, 0.8, 0.5),
+            LightColor::Blue => Vec3::new(0.0, 0.0, 1.0),
         }
     }
 }

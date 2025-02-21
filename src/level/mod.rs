@@ -1,4 +1,4 @@
-use bevy::{prelude::*, render::view::RenderLayers};
+use bevy::prelude::*;
 use bevy_ecs_ldtk::{prelude::*, systems::process_ldtk_levels};
 
 use crate::{
@@ -6,7 +6,7 @@ use crate::{
     shared::{GameState, ResetLevel},
 };
 use crystal::CrystalPlugin;
-use entity::SpikeBundle;
+use entity::{SpikeBundle, SemiSolidPlatformBundle};
 use misc::{init_start_marker, ButtonBundle, StartFlagBundle};
 use setup::LevelSetupPlugin;
 use walls::{spawn_wall_collision, WallBundle};
@@ -31,11 +31,11 @@ impl Plugin for LevelManagementPlugin {
             .register_ldtk_entity::<StartFlagBundle>("Start")
             .register_ldtk_int_cell_for_layer::<WallBundle>("Terrain", 1)
             .register_ldtk_int_cell_for_layer::<SpikeBundle>("Terrain", 2)
+            .register_ldtk_int_cell_for_layer::<SemiSolidPlatformBundle>("Terrain", 15)
             .add_systems(
                 PreUpdate,
                 (spawn_wall_collision, init_start_marker).in_set(LevelSystems::Processing),
             )
-            .add_systems(Startup, spawn_background)
             .add_systems(Update, switch_level)
             .configure_sets(
                 PreUpdate,
@@ -67,23 +67,6 @@ pub enum LevelSystems {
     Simulation,
     /// Systems used to process Ldtk Entities after they spawn in [`PreUpdate`]
     Processing,
-}
-
-#[derive(Component)]
-pub struct BackgroundMarker;
-
-fn spawn_background(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn((
-        Sprite {
-            image: asset_server.load("levels/background.png"),
-            color: Color::srgb(0.3, 0.3, 0.3),
-            ..default()
-        },
-        Transform::default(),
-        Visibility::Visible,
-        BackgroundMarker,
-        RenderLayers::layer(1),
-    ));
 }
 
 /// [`System`] that will run on [`Update`] to check if the Player has moved to another level. If

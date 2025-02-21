@@ -9,6 +9,7 @@ use debug::DebugPlugin;
 use input::{init_cursor_world_coords, update_cursor_world_coords};
 use level::LevelManagementPlugin;
 use light::LightManagementPlugin;
+use lighting::LightingPlugin;
 use pause::PausePlugin;
 use player::PlayerManagementPlugin;
 use shared::{GameState, ResetLevel};
@@ -19,6 +20,7 @@ mod debug;
 mod input;
 mod level;
 mod light;
+mod lighting;
 mod pause;
 mod player;
 mod shared;
@@ -44,11 +46,12 @@ fn main() {
         .add_plugins(LogDiagnosticsPlugin::default())
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(8.0).in_fixed_schedule())
         .add_plugins(PlayerManagementPlugin)
-            .add_plugins(RapierDebugRenderPlugin::default())
+        .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(LevelManagementPlugin)
         .add_plugins(LightManagementPlugin)
         .add_plugins(PausePlugin)
         .add_plugins(CameraPlugin)
+        .add_plugins(LightingPlugin)
         .add_plugins(DebugPlugin::default())
         .insert_state(GameState::Playing)
         .add_event::<ResetLevel>()
